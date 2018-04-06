@@ -3,7 +3,7 @@ Benchmark utility
 
 How does your code scale and perform when running on high-core servers?
 
-Let's fine out:
+Let's find out:
 
 ```sh
 ./corebench bench -repo github.com/deckarep/golang-set --provider=DO --token=XXX --cpu=1,2,4,8,16,32,64,128
