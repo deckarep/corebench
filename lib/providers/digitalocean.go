@@ -112,7 +112,7 @@ runcmd:
 		for _, d := range droplets {
 			ip, _ := d.PublicIPv4()
 			fmt.Println(d.Name, d.ID, ip)
-			// if we have an ip, stary attempting...
+			// if we have an ip, start attempting...
 			if ip != "" {
 				err := ssh.ExecuteSSH(ip, `cd /opt/corebench/golang-set && /usr/local/go/bin/go test -cpu=1,2,4,8,16 -bench=.`)
 				if err != nil {
@@ -122,9 +122,6 @@ runcmd:
 		}
 		time.Sleep(time.Second * 5)
 	}
-
-	// Once you have the ip address and once repo is cloned and installed
-	// ssh 138.197.217.138 "cd /opt/corebench/golang-set && /usr/local/go/bin/go test -bench=."
 
 	return nil
 }
