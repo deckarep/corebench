@@ -19,14 +19,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package cmd
+package providers
 
-import (
-	"github.com/spf13/cobra"
-)
+import "golang.org/x/oauth2"
 
-// Entry point into the tool.
-var RootCmd = &cobra.Command{
-	Use:   "corebench",
-	Short: "corebench: a benchmarking tool",
+type tokenSource struct {
+	PersonalAccessToken string
+}
+
+func NewDigitalOceanAuth(pat string) oauth2.TokenSource {
+	return &tokenSource{
+		PersonalAccessToken: pat,
+	}
+}
+
+func (t *tokenSource) Token() (*oauth2.Token, error) {
+	token := &oauth2.Token{
+		AccessToken: t.PersonalAccessToken,
+	}
+	return token, nil
 }

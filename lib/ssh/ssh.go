@@ -18,15 +18,34 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-
-package cmd
+package ssh
 
 import (
-	"github.com/spf13/cobra"
+	"fmt"
+	"os"
+	"os/exec"
 )
 
-// Entry point into the tool.
-var RootCmd = &cobra.Command{
-	Use:   "corebench",
-	Short: "corebench: a benchmarking tool",
+// ExecuteSSH executes a single ssh remote command.
+func ExecuteSSH(host string, cmd string) error {
+	sshArgs := []string{
+		"-p", fmt.Sprintf("%d", 22),
+		"-o", "UserKnownHostsFile=/dev/null",
+		"-o", "StrictHostKeyChecking=no",
+		"-o", "LogLevel=quiet",
+		host,
+		cmd, // actual string command to execute.
+	}
+
+	currentCmd := exec.Command("ssh", sshArgs...)
+
+	// TODO: tee off to a file, if they specificed a file.
+	currentCmd.Stdin = os.Stdin
+	currentCmd.Stderr = os.Stderr
+	currentCmd.Stdout = os.Stdout
+
+	if err := currentCmd.Run(); err != nil {
+		return err
+	}
+	return nil
 }

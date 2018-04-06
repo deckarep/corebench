@@ -19,14 +19,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package cmd
+package providers
 
-import (
-	"github.com/spf13/cobra"
-)
+import "context"
 
-// Entry point into the tool.
-var RootCmd = &cobra.Command{
-	Use:   "corebench",
-	Short: "corebench: a benchmarking tool",
+// Provider is some type of provider.
+type Provider interface {
+	Spinup(context.Context) error
+	Spindown(context.Context) error
+	Bench(context.Context) error
 }

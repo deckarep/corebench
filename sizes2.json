@@ -1,0 +1,229 @@
+{
+  "sizes": [
+    {
+      "slug": "c-16",
+      "memory": 32768,
+      "vcpus": 16,
+      "disk": 200,
+      "transfer": 7,
+      "price_monthly": 320,
+      "price_hourly": 0.4760000109672546,
+      "regions": [
+        "ams2",
+        "ams3",
+        "blr1",
+        "fra1",
+        "lon1",
+        "nyc1",
+        "nyc2",
+        "nyc3",
+        "sfo1",
+        "sfo2",
+        "sgp1",
+        "tor1"
+      ],
+      "available": true
+    },
+    {
+      "slug": "s-16vcpu-64gb",
+      "memory": 65536,
+      "vcpus": 16,
+      "disk": 1280,
+      "transfer": 9,
+      "price_monthly": 320,
+      "price_hourly": 0.4761900007724762,
+      "regions": [
+        "ams2",
+        "ams3",
+        "blr1",
+        "fra1",
+        "lon1",
+        "nyc1",
+        "nyc2",
+        "nyc3",
+        "sfo1",
+        "sfo2",
+        "sgp1",
+        "tor1"
+      ],
+      "available": true
+    },
+    {
+      "slug": "48gb",
+      "memory": 49152,
+      "vcpus": 16,
+      "disk": 480,
+      "transfer": 8,
+      "price_monthly": 480,
+      "price_hourly": 0.7142900228500366,
+      "regions": [
+        "ams2",
+        "ams3",
+        "blr1",
+        "fra1",
+        "lon1",
+        "nyc1",
+        "nyc2",
+        "nyc3",
+        "sfo1",
+        "sfo2",
+        "sgp1",
+        "tor1"
+      ],
+      "available": true
+    },
+    {
+      "slug": "s-20vcpu-96gb",
+      "memory": 98304,
+      "vcpus": 20,
+      "disk": 1920,
+      "transfer": 10,
+      "price_monthly": 480,
+      "price_hourly": 0.7142900228500366,
+      "regions": [
+        "ams2",
+        "ams3",
+        "blr1",
+        "fra1",
+        "lon1",
+        "nyc1",
+        "nyc2",
+        "nyc3",
+        "sfo1",
+        "sfo2",
+        "sgp1",
+        "tor1"
+      ],
+      "available": true
+    },
+    {
+      "slug": "64gb",
+      "memory": 65536,
+      "vcpus": 20,
+      "disk": 640,
+      "transfer": 9,
+      "price_monthly": 640,
+      "price_hourly": 0.9523800015449524,
+      "regions": [
+        "ams2",
+        "ams3",
+        "blr1",
+        "fra1",
+        "lon1",
+        "nyc1",
+        "nyc2",
+        "nyc3",
+        "sfo1",
+        "sfo2",
+        "sgp1",
+        "tor1"
+      ],
+      "available": true
+    },
+    {
+      "slug": "c-32",
+      "memory": 65536,
+      "vcpus": 32,
+      "disk": 400,
+      "transfer": 9,
+      "price_monthly": 640,
+      "price_hourly": 0.9520000219345093,
+      "regions": [
+        "ams2",
+        "ams3",
+        "blr1",
+        "fra1",
+        "lon1",
+        "nyc1",
+        "nyc2",
+        "nyc3",
+        "sfo1",
+        "sfo2",
+        "sgp1",
+        "tor1"
+      ],
+      "available": true
+    },
+    {
+      "slug": "s-24vcpu-128gb",
+      "memory": 131072,
+      "vcpus": 24,
+      "disk": 2560,
+      "transfer": 11,
+      "price_monthly": 640,
+      "price_hourly": 0.9523800015449524,
+      "regions": [
+        "ams2",
+        "ams3",
+        "blr1",
+        "fra1",
+        "lon1",
+        "nyc1",
+        "nyc2",
+        "nyc3",
+        "sfo1",
+        "sfo2",
+        "sgp1",
+        "tor1"
+      ],
+      "available": true
+    },
+    {
+      "slug": "c-48",
+      "memory": 73728,
+      "vcpus": 48,
+      "disk": 20,
+      "transfer": 5,
+      "price_monthly": 960,
+      "price_hourly": 1.429000020027161,
+      "regions": [
+        "ams2",
+        "ams3",
+        "blr1",
+        "fra1",
+        "lon1",
+        "nyc1",
+        "nyc2",
+        "nyc3",
+        "sfo1",
+        "sfo2",
+        "sgp1",
+        "tor1"
+      ],
+      "available": true
+    },
+    {
+      "slug": "s-32vcpu-192gb",
+      "memory": 196608,
+      "vcpus": 32,
+      "disk": 3840,
+      "transfer": 12,
+      "price_monthly": 960,
+      "price_hourly": 1.428570032119751,
+      "regions": [
+        "ams2",
+        "ams3",
+        "blr1",
+        "fra1",
+        "lon1",
+        "nyc1",
+        "nyc2",
+        "nyc3",
+        "sfo1",
+        "sfo2",
+        "sgp1",
+        "tor1"
+      ],
+      "available": true
+    }
+  ],
+  "links": {
+    "pages": {
+      "first": "https://api.digitalocean.com/v2/sizes?page=1",
+      "prev": "https://api.digitalocean.com/v2/sizes?page=1"
+    }
+  },
+  "meta": {
+    "total": 29
+  }
+}

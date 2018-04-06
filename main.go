@@ -23,6 +23,7 @@ package main
 
 import (
 	"log"
+
 	"github.com/deckarep/corebench/cmd"
 )
 
