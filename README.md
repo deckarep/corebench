@@ -11,15 +11,15 @@ Let's find out:
 ```
 
 ### Here's what happens:
-1. A command like above will provision an on-demand high-performance computing server
-2. Installs Go, and clones your repository
-3. It will run Go's benchmark tooling against your repo and generate a comprehensive report demonstrating just how well your code scales across a large number of cores
-4. It will immediately decomission the computing resource so you only pay for a fraction of the cost
+* A command like above will provision an on-demand high-performance computing server
+* Installs Go, and clones your repository
+* It will run Go's benchmark tooling against your repo and generate a comprehensive report demonstrating just how well your code scales across a large number of cores
+* It will immediately decomission the computing resource so you only pay for a fraction of the cost
 
 ### Here's what you need:
-1. API/Credential access to at least one provider - Digital Ocean is the first provider to exist
-2. The ability to pay for your own computing resources for which ever providers you choose
-3. A source repo with comprehensive benchmarks to run against this suite
+* API/Credential access to at least one provider - Digital Ocean is the first provider to exist
+* The ability to pay for your own computing resources for which ever providers you choose
+* A source repo with comprehensive benchmarks to run against this suite
 
 ### Caution:
 * This utility is unstable, API is in flux and is expected to change
