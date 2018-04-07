@@ -26,6 +26,4 @@ import "context"
 // Provider is some type of provider.
 type Provider interface {
 	Spinup(context.Context) error
-	Spindown(context.Context) error
-	Bench(context.Context) error
 }

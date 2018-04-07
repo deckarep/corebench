@@ -36,6 +36,7 @@ var (
 	cpu      string
 	gitRepo  string
 	file     string
+	term     bool
 )
 
 // Usage: ./corebench bench -t=$TOKEN -k=$SSH_FINGERPRINT -repo github.com/deckarep/golang-set
@@ -52,6 +53,8 @@ func init() {
 		"git", "g", "", "gitRepo a path to a git repo to clone from, this must be publicly accessable")
 	benchCmd.PersistentFlags().StringVarP(&file,
 		"file", "f", "", "file is a path to save benchmark results")
+	benchCmd.PersistentFlags().BoolVarP(&term,
+		"term", "", true, "indicates whether corebench should auto-terminate instance(s) on complete")
 
 	// TODO: -benchmem flag (like go tooling)
 	// TODO: -regex flag (like go tooling)

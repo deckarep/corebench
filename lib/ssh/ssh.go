@@ -24,6 +24,23 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
+	"time"
+
+	"golang.org/x/crypto/ssh"
+)
+
+var (
+	// sshConfig is mocked out to just attempt connections until we get a handshake failure
+	// at that point we know the connection is ready.
+	sshConfig = &ssh.ClientConfig{
+		User: "root",
+		Auth: []ssh.AuthMethod{
+			ssh.Password("!"),
+		},
+		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
+		Timeout:         time.Second * 1,
+	}
 )
 
 // ExecuteSSH executes a single ssh remote command.
@@ -48,4 +65,23 @@ func ExecuteSSH(host string, cmd string) error {
 		return err
 	}
 	return nil
+}
+
+// PollSSH dials in a loop waiting to connect, this isn't used for anything other than
+// just to negotiate that the connection is open.
+func PollSSH(host string) error {
+	for {
+		client, err := ssh.Dial("tcp", host, sshConfig)
+		if err != nil {
+			if !strings.Contains(err.Error(), "unable to authenticate") {
+				//log.Println("Failed to poll ssh, trying again: ", err)
+				time.Sleep(time.Second * 1)
+				continue
+			}
+		}
+		if client != nil {
+			client.Close()
+		}
+		return nil
+	}
 }
