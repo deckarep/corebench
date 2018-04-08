@@ -25,34 +25,136 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/deckarep/corebench/lib/ssh"
+	"github.com/deckarep/corebench/lib/utility"
 	"github.com/digitalocean/godo"
 	"golang.org/x/oauth2"
 )
 
-type DigitalOceanProvider struct {
-	client *godo.Client
+const (
+	doProviderInstanceNameFmt = "corebench-digitalocean-%s"
+)
 
-	// sshKeys can be optionally used to provision resources so you can log in and inspect.
+var (
+	doDefaultPageOpts = &godo.ListOptions{
+		Page:    1,
+		PerPage: 200,
+	}
+
+	goVersion         = "go1.9.1.linux-amd64.tar.gz"
+	cloudInitTemplate = `
+#cloud-config
+runcmd:
+  - echo "Setting up corebench for the first time..."
+  - echo "Installing dependencies..."
+  - apt-get -y install git
+  - wget https://storage.googleapis.com/golang/${go-version}
+  - tar -C /usr/local -xzf ${go-version}
+  - git clone ${git-repo} /opt/corebench/${git-repo-last-path}
+  - touch /opt/corebench/.core-init
+  - echo "Finished corebench initialization"
+`
+	benchCommandTemplate = `while [ ! -f /opt/corebench/.core-init ]; do sleep 1; done && cd /opt/corebench/${git-repo-last-path} && /usr/local/go/bin/go test -cpu ${cpu-count} -bench=. -benchmem`
+)
+
+type DigitalOceanProvider struct {
+	client       *godo.Client
+	repoLastPath string
+	// sshKeys can be optionally used to provision resources so you can log in and inspect the host.
 	sshKeys []string
 }
 
-func NewDigitalOceanProvider(pat string, sshKeys []string) Provider {
+func NewDigitalOceanProvider(pat string) Provider {
 	ts := NewDigitalOceanAuth(pat)
 	oauthClient := oauth2.NewClient(oauth2.NoContext, ts)
 	return &DigitalOceanProvider{
-		client:  godo.NewClient(oauthClient),
-		sshKeys: sshKeys,
+		client: godo.NewClient(oauthClient),
 	}
 }
 
-func (p *DigitalOceanProvider) Spinup(ctx context.Context) error {
-	dropletName := "super-cool-droplet"
+func (p *DigitalOceanProvider) SetKeys(keys []string) {
+	p.sshKeys = keys
+}
+
+func (p *DigitalOceanProvider) List(ctx context.Context) error {
+	droplets, _, err := p.client.Droplets.ListByTag(ctx, "corebench", doDefaultPageOpts)
+	if err != nil {
+		return err
+	}
+
+	if len(droplets) == 0 {
+		fmt.Println("No corebench droplets are provisioned on digitalocean")
+		return nil
+	}
+
+	for _, d := range droplets {
+		ip, _ := d.PublicIPv4()
+		fmt.Println(d.ID, d.Name, ip, d.Created)
+	}
+
+	return nil
+}
+
+func (p *DigitalOceanProvider) Term(ctx context.Context) error {
+	droplets, _, err := p.client.Droplets.ListByTag(ctx, "corebench", doDefaultPageOpts)
+	if err != nil {
+		return err
+	}
+
+	if len(droplets) == 0 {
+		fmt.Println("No corebench droplets to terminate on digitalocean")
+		return nil
+	}
+
+	totalCount := len(droplets)
+	termedCount := 0
+	for _, droplet := range droplets {
+		_, err := p.client.Droplets.Delete(ctx, droplet.ID)
+		if err != nil {
+			log.Println("Failed to terminate droplet: need to retry or delete it manually or you will billed!!!", droplet.ID)
+			continue
+		}
+		termedCount++
+	}
+
+	fmt.Printf("Terminated (%d) droplets out of (%d) total droplets found\n", termedCount, totalCount)
+
+	return nil
+}
+
+func (p *DigitalOceanProvider) processCloudInitTemplate(settings ProviderSpinSettings) string {
+
+	p.repoLastPath = utility.GitPathLast(settings.GitURL())
+
+	finalCloudTemplate :=
+		strings.Replace(cloudInitTemplate, "${go-version}", goVersion, -1)
+	finalCloudTemplate =
+		strings.Replace(finalCloudTemplate, "${git-repo}", settings.GitURL(), -1)
+	finalCloudTemplate =
+		strings.Replace(finalCloudTemplate, "${git-repo-last-path}", p.repoLastPath, -1)
+
+	return finalCloudTemplate
+}
+
+func (p *DigitalOceanProvider) processBenchCommandTemplate(settings ProviderSpinSettings) string {
+	final :=
+		strings.Replace(benchCommandTemplate, "${git-repo-last-path}", p.repoLastPath, -1)
+	final =
+		strings.Replace(final, "${cpu-count}", settings.Cpus(), -1)
+
+	return final
+}
+
+func (p *DigitalOceanProvider) Spinup(ctx context.Context, settings ProviderSpinSettings) error {
+
+	// Using this to show output before we run code.
+	//log.Fatal(p.processBenchCommandTemplate(settings))
 
 	createRequest := &godo.DropletCreateRequest{
-		Name: dropletName,
+		Name: "fake-droplet", //fmt.Sprintf(doProviderInstanceNameFmt, "7cfeebd"),
 		// Costs: .01 penny to turn on (test with this)
 		Region: "sfo2",
 		Size:   "s-1vcpu-1gb",
@@ -64,18 +166,7 @@ func (p *DigitalOceanProvider) Spinup(ctx context.Context) error {
 			Slug: "ubuntu-14-04-x64",
 		},
 		// TODO: templatize UserData so things like go version can be swapped out.
-		UserData: `
-#cloud-config
-runcmd:
-  - echo "Setting up corebench for the first time..."
-  - echo "Installing dependencies..."
-  - apt-get -y install git
-  - wget https://storage.googleapis.com/golang/go1.9.1.linux-amd64.tar.gz
-  - tar -C /usr/local -xzf go1.9.1.linux-amd64.tar.gz
-  - git clone https://github.com/deckarep/golang-set /opt/corebench/golang-set
-  - touch /opt/corebench/.core-init
-  - echo "Finished corebench initialization"
-`,
+		UserData: p.processCloudInitTemplate(settings),
 	}
 
 	if len(p.sshKeys) > 0 {
@@ -101,12 +192,6 @@ runcmd:
 	fmt.Println(newDroplet.ID)
 	fmt.Println(newDroplet.PublicIPv4())
 
-	// Spin wait - TODO: make this more graceful.
-	opt := &godo.ListOptions{
-		Page:    1,
-		PerPage: 200,
-	}
-
 	// Capture the droplets because need to delete at the end.
 	// TODO: retry the deletes
 	// TODO: capture panics and ensure we delete even still
@@ -124,6 +209,12 @@ runcmd:
 
 	var chosenIP string
 	const maxDialAttempts = 20
+
+	// Spin wait - TODO: make this more graceful.
+	opt := &godo.ListOptions{
+		Page:    1,
+		PerPage: 200,
+	}
 
 advance_to_ssh:
 	for {
@@ -152,7 +243,8 @@ advance_to_ssh:
 		time.Sleep(time.Second * 3)
 	}
 
-	err = ssh.ExecuteSSH(chosenIP, `while [ ! -f /opt/corebench/.core-init ]; do sleep 1; done && cd /opt/corebench/golang-set && /usr/local/go/bin/go test -cpu=1,2,4,8,16 -bench=. -benchmem`)
+	benchCmd := p.processBenchCommandTemplate(settings)
+	err = ssh.ExecuteSSH(chosenIP, benchCmd)
 	if err != nil {
 		fmt.Println("Failed to SSH: ", err)
 	}

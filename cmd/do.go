@@ -19,23 +19,28 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package providers
+package cmd
 
-import "context"
+import (
+	"github.com/spf13/cobra"
+)
 
-type ProviderSpinSettings interface {
-	GitURL() string
-	Cpus() string
+var (
+	token string
+	file  string
+)
+
+// Usage: ./corebench bench -t=$TOKEN -k=$SSH_FINGERPRINT -repo github.com/deckarep/golang-set
+func init() {
+	digitalOceanCmd.PersistentFlags().StringVarP(&token,
+		"token", "t", "", "token is some cloud provider personal access token")
+	digitalOceanCmd.PersistentFlags().StringVarP(&file,
+		"file", "f", "", "file is a path to save benchmark results")
+	RootCmd.AddCommand(digitalOceanCmd)
 }
 
-// Provider is some type of provider.
-type Provider interface {
-	// Spinup provisions and benchmarks in one shot.
-	Spinup(context.Context, ProviderSpinSettings) error
-	// SetKeys allows you to specify your SSH keys to be installed on the resource.
-	SetKeys(keys []string)
-	// List will list any provisioned instances created by corebench.
-	List(context.Context) error
-	// Term terminates instance provisioned by corebench.
-	Term(context.Context) error
+// benchCmd executes a remote benchmark.
+var digitalOceanCmd = &cobra.Command{
+	Use:   "do",
+	Short: "is the digitalocean corebench toolkit",
 }

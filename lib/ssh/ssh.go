@@ -68,7 +68,8 @@ func ExecuteSSH(host string, cmd string) error {
 }
 
 // PollSSH dials in a loop waiting to connect, this isn't used for anything other than
-// just to negotiate that the connection is open.
+// just to negotiate that the connection is open and will never succeed in authentication.
+// This is used purely to know a server's SSH listener is ready to connect to.
 func PollSSH(host string) error {
 	for {
 		client, err := ssh.Dial("tcp", host, sshConfig)

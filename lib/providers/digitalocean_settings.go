@@ -21,21 +21,15 @@ SOFTWARE.
 
 package providers
 
-import "context"
-
-type ProviderSpinSettings interface {
-	GitURL() string
-	Cpus() string
+type DoSpinSettings struct {
+	Git string
+	Cpu string
 }
 
-// Provider is some type of provider.
-type Provider interface {
-	// Spinup provisions and benchmarks in one shot.
-	Spinup(context.Context, ProviderSpinSettings) error
-	// SetKeys allows you to specify your SSH keys to be installed on the resource.
-	SetKeys(keys []string)
-	// List will list any provisioned instances created by corebench.
-	List(context.Context) error
-	// Term terminates instance provisioned by corebench.
-	Term(context.Context) error
+func (do *DoSpinSettings) GitURL() string {
+	return do.Git
+}
+
+func (do *DoSpinSettings) Cpus() string {
+	return do.Cpu
 }

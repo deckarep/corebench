@@ -30,52 +30,48 @@ import (
 )
 
 var (
-	provider string
-	token    string
-	keys     string
-	cpu      string
-	gitRepo  string
-	file     string
-	term     bool
+	keys         string
+	cpu          string
+	leaveRunning bool
+	git          string
 )
 
-// Usage: ./corebench bench -t=$TOKEN -k=$SSH_FINGERPRINT -repo github.com/deckarep/golang-set
+// Usage: ./corebench do bench -t=$TOKEN -k=$SSH_FINGERPRINT -git github.com/deckarep/golang-set
 func init() {
-	benchCmd.PersistentFlags().StringVarP(&provider,
-		"provider", "p", "", "cloud provider to launch the remote resource: {DO - DigitalOcean}")
-	benchCmd.PersistentFlags().StringVarP(&token,
-		"token", "t", "", "token is some cloud provider personal access token")
-	benchCmd.PersistentFlags().StringVarP(&keys,
+	digitalOceanBenchCmd.PersistentFlags().StringVarP(&keys,
 		"keys", "k", "", "keys allow you to embed ssh keys via their MD5 fingerprint id, comma delimited list")
-	benchCmd.PersistentFlags().StringVarP(&cpu,
-		"cpu", "c", "", "cpu is a comma delimited list: -cpu=1,2,4,8 or -cpu=1-16")
-	benchCmd.PersistentFlags().StringVarP(&gitRepo,
-		"git", "g", "", "gitRepo a path to a git repo to clone from, this must be publicly accessable")
-	benchCmd.PersistentFlags().StringVarP(&file,
-		"file", "f", "", "file is a path to save benchmark results")
-	benchCmd.PersistentFlags().BoolVarP(&term,
-		"term", "", true, "indicates whether corebench should auto-terminate instance(s) on complete")
+	digitalOceanBenchCmd.PersistentFlags().StringVarP(&cpu,
+		"cpu", "c", "`nproc`", "cpu is a comma delimited list: -cpu=1,2,4,8 or -cpu=1-16")
+	digitalOceanBenchCmd.PersistentFlags().StringVarP(&git,
+		"git", "g", "", "git path to a git repo to clone from, this must be publicly accessable")
+	digitalOceanBenchCmd.PersistentFlags().BoolVarP(&leaveRunning,
+		"leave-running", "", false, "indicates whether corebench should auto-terminate instance(s) on complete")
 
 	// TODO: -benchmem flag (like go tooling)
 	// TODO: -regex flag (like go tooling)
 	// TODO: -race flag (like go tooling)
 
-	RootCmd.AddCommand(benchCmd)
+	digitalOceanCmd.AddCommand(digitalOceanBenchCmd)
 }
 
 // benchCmd executes a remote benchmark.
-var benchCmd = &cobra.Command{
+var digitalOceanBenchCmd = &cobra.Command{
 	Use:   "bench",
-	Short: "bench runs a remote benchmark on a multi-core cloud resource",
+	Short: "runs a remote benchmark on a multi-core cloud resource from digitalocean",
 	Run: func(cmd *cobra.Command, args []string) {
-		println("we're about to bench!")
-		println("spinning up a DO droplet")
-		println("here's the token: ", token)
-
-		sshKeys := strings.Split(keys, ",")
-
-		provider := providers.NewDigitalOceanProvider(token, sshKeys)
 		ctx := context.Background()
-		provider.Spinup(ctx)
+
+		settings := &providers.DoSpinSettings{
+			Git: git,
+			Cpu: cpu,
+		}
+
+		provider := providers.NewDigitalOceanProvider(token)
+		// Maybe this SetKeys api method isn't ideal.
+		if keys != "" {
+			provider.SetKeys(strings.Split(keys, ","))
+		}
+
+		provider.Spinup(ctx, settings)
 	},
 }
