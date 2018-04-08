@@ -26,6 +26,12 @@
   version = "v1.0"
 
 [[projects]]
+  name = "github.com/satori/go.uuid"
+  packages = ["."]
+  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
+  version = "v1.2.0"
+
+[[projects]]
   name = "github.com/spf13/cobra"
   packages = ["."]
   revision = "a1f051bc3eba734da4772d60e2d677f47cf93ef4"
@@ -70,6 +76,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3db954c0fa2d5c78508c12b59fb931d4ef7435fcb638063ab7c405b9bb916cbf"
+  inputs-digest = "fbfa21129c236affeee2ab26ce235658021509b4cf692c3b6114a6b94cdbe636"
   solver-name = "gps-cdcl"
   solver-version = 1
