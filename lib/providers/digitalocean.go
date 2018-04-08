@@ -57,7 +57,8 @@ runcmd:
   - touch /opt/corebench/.core-init
   - echo "Finished corebench initialization"
 `
-	benchCommandTemplate = `while [ ! -f /opt/corebench/.core-init ]; do sleep 1; done && cd /opt/corebench/${git-repo-last-path} && /usr/local/go/bin/go test -cpu ${cpu-count} -bench=. -benchmem`
+	benchReadyScript     = "while [ ! -f /opt/corebench/.core-init ]; do sleep 1; done"
+	benchCommandTemplate = `cd /opt/corebench/${git-repo-last-path} && /usr/local/go/bin/go test ${benchmem-setting}-cpu ${cpu-count} -bench=.`
 )
 
 type DigitalOceanProvider struct {
@@ -126,7 +127,6 @@ func (p *DigitalOceanProvider) Term(ctx context.Context) error {
 }
 
 func (p *DigitalOceanProvider) processCloudInitTemplate(settings ProviderSpinSettings) string {
-
 	p.repoLastPath = utility.GitPathLast(settings.GitURL())
 
 	finalCloudTemplate :=
@@ -140,21 +140,19 @@ func (p *DigitalOceanProvider) processCloudInitTemplate(settings ProviderSpinSet
 }
 
 func (p *DigitalOceanProvider) processBenchCommandTemplate(settings ProviderSpinSettings) string {
-	final :=
+	benchCmd :=
 		strings.Replace(benchCommandTemplate, "${git-repo-last-path}", p.repoLastPath, -1)
-	final =
-		strings.Replace(final, "${cpu-count}", settings.Cpus(), -1)
+	benchCmd =
+		strings.Replace(benchCmd, "${cpu-count}", settings.Cpus(), -1)
+	benchCmd =
+		strings.Replace(benchCmd, "${benchmem-setting}", settings.BenchMemString(), -1)
 
-	return final
+	return fmt.Sprintf("%s && %s", benchReadyScript, benchCmd)
 }
 
 func (p *DigitalOceanProvider) Spinup(ctx context.Context, settings ProviderSpinSettings) error {
-
-	// Using this to show output before we run code.
-	//log.Fatal(p.processBenchCommandTemplate(settings))
-
 	createRequest := &godo.DropletCreateRequest{
-		Name: "fake-droplet", //fmt.Sprintf(doProviderInstanceNameFmt, "7cfeebd"),
+		Name: fmt.Sprintf(doProviderInstanceNameFmt, utility.NewInstanceID()),
 		// Costs: .01 penny to turn on (test with this)
 		Region: "sfo2",
 		Size:   "s-1vcpu-1gb",
@@ -179,13 +177,12 @@ func (p *DigitalOceanProvider) Spinup(ctx context.Context, settings ProviderSpin
 		createRequest.SSHKeys = dropKeys
 	}
 
-	println("About to create droplet")
+	fmt.Printf("Provisioning droplet: %s...\n", createRequest.Name)
 	newDroplet, _, err := p.client.Droplets.Create(ctx, createRequest)
 	if err != nil {
-		fmt.Printf("Something bad happened: %s\n\n", err)
+		fmt.Printf("Failed to create droplet with err: %s\n", err)
 		return err
 	}
-	println("Finished creating droplet")
 
 	fmt.Println(newDroplet.Name)
 	fmt.Println(newDroplet.ID)

@@ -33,7 +33,7 @@ var (
 // Usage: ./corebench bench -t=$TOKEN -k=$SSH_FINGERPRINT -repo github.com/deckarep/golang-set
 func init() {
 	digitalOceanCmd.PersistentFlags().StringVarP(&token,
-		"token", "t", "", "token is some cloud provider personal access token")
+		"DO_PAT", "", "", "token is some cloud provider personal access token")
 	digitalOceanCmd.PersistentFlags().StringVarP(&file,
 		"file", "f", "", "file is a path to save benchmark results")
 	RootCmd.AddCommand(digitalOceanCmd)

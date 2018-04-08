@@ -54,7 +54,7 @@ func init() {
 
 var digitalOceanTermCmd = &cobra.Command{
 	Use:   "term",
-	Short: "terminates corebench resources provisioned in digitalocean that are currently alive",
+	Short: "terminates corebench resources provisioned on digitalocean that are currently alive",
 	Run: func(cmd *cobra.Command, args []string) {
 		provider := providers.NewDigitalOceanProvider(token)
 		ctx := context.Background()

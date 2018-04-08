@@ -22,8 +22,16 @@ SOFTWARE.
 package providers
 
 type DoSpinSettings struct {
-	Git string
-	Cpu string
+	Git      string
+	Cpu      string
+	Benchmem bool
+}
+
+func (do *DoSpinSettings) BenchMemString() string {
+	if do.Benchmem {
+		return "-benchmem "
+	}
+	return ""
 }
 
 func (do *DoSpinSettings) GitURL() string {

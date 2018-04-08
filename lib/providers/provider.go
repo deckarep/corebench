@@ -26,6 +26,7 @@ import "context"
 type ProviderSpinSettings interface {
 	GitURL() string
 	Cpus() string
+	BenchMemString() string
 }
 
 // Provider is some type of provider.

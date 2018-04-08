@@ -34,6 +34,7 @@ var (
 	cpu          string
 	leaveRunning bool
 	git          string
+	benchMem     bool
 )
 
 // Usage: ./corebench do bench -t=$TOKEN -k=$SSH_FINGERPRINT -git github.com/deckarep/golang-set
@@ -46,6 +47,8 @@ func init() {
 		"git", "g", "", "git path to a git repo to clone from, this must be publicly accessable")
 	digitalOceanBenchCmd.PersistentFlags().BoolVarP(&leaveRunning,
 		"leave-running", "", false, "indicates whether corebench should auto-terminate instance(s) on complete")
+	digitalOceanBenchCmd.PersistentFlags().BoolVarP(&benchMem,
+		"benchmem", "", false, "indicates whether corebench include allocations just like the go tool")
 
 	// TODO: -benchmem flag (like go tooling)
 	// TODO: -regex flag (like go tooling)
@@ -62,8 +65,9 @@ var digitalOceanBenchCmd = &cobra.Command{
 		ctx := context.Background()
 
 		settings := &providers.DoSpinSettings{
-			Git: git,
-			Cpu: cpu,
+			Git:      git,
+			Cpu:      cpu,
+			Benchmem: benchMem,
 		}
 
 		provider := providers.NewDigitalOceanProvider(token)
