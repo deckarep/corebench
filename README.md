@@ -6,9 +6,35 @@ How does your code scale and perform when running on high-core servers?
 
 Let's find out:
 
+### Example
+
+Run this command
 ```sh
-# Spins up a large core Digitalocean box, clones your repo, benchmarks, and terminates in one shot.
 ./corebench do bench --git github.com/{user}/{your-code} --cpu=1,2,4,8,16,32,48
+```
+
+See this output
+```sh
+Provision 48-core droplet..
+Droplet created: x.x.x.x -- running benchmark...
+
+goos: linux
+goarch: amd64
+BenchmarkStoreRegular-2               	 2000000	       529 ns/op	      88 B/op	       0 allocs/op
+BenchmarkStoreRegular-4               	 3000000	       452 ns/op	      61 B/op	       0 allocs/op
+BenchmarkStoreRegular-8               	 5000000	       419 ns/op	      70 B/op	       0 allocs/op
+BenchmarkStoreSync-2                  	 1000000	      2250 ns/op	     179 B/op	       5 allocs/op
+BenchmarkStoreSync-4                  	 1000000	      1807 ns/op	     179 B/op	       5 allocs/op
+BenchmarkStoreSync-8                  	 1000000	      1637 ns/op	     179 B/op	       5 allocs/op
+BenchmarkDeleteRegular-2              	10000000	       222 ns/op	       0 B/op	       0 allocs/op
+BenchmarkDeleteRegular-4              	10000000	       224 ns/op	       0 B/op	       0 allocs/op
+BenchmarkDeleteRegular-8              	10000000	       228 ns/op	       0 B/op	       0 allocs/op
+BenchmarkDeleteSync-2                   []
+...
+...
+...
+
+Benchmark completed...tearing down droplet.
 ```
 
 ### Here's what happens:
