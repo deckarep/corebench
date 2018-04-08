@@ -7,7 +7,8 @@ How does your code scale and perform when running on high-core servers?
 Let's find out:
 
 ```sh
-./corebench bench -repo github.com/{user}/{your-code} --provider=DO --token=XXX --cpu=1,2,4,8,16,32,64,128
+# Spins up a large core Digitalocean box, clones your repo, benchmarks, and terminates in one shot.
+./corebench do bench --git github.com/{user}/{your-code} --cpu=1,2,4,8,16,32,48
 ```
 
 ### Here's what happens:

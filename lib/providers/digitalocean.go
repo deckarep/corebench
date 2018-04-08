@@ -165,7 +165,6 @@ func (p *DigitalOceanProvider) Spinup(ctx context.Context, settings ProviderSpin
 		Image: godo.DropletCreateImage{
 			Slug: "ubuntu-14-04-x64",
 		},
-		// TODO: templatize UserData so things like go version can be swapped out.
 		UserData: p.processCloudInitTemplate(settings),
 	}
 
