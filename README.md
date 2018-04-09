@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/deckarep/corebench.svg?branch=master)](https://travis-ci.org/deckarep/corebench)
+
 # corebench
 Benchmark utility that's intended to exercise benchmarks and how they scale with a large number of cores.
 
