@@ -29,6 +29,12 @@ type ProviderSpinSettings interface {
 	BenchMemString() string
 }
 
+type ProviderTermSettings interface {
+	All() bool
+	ByIP() string
+	ByName() string
+}
+
 // Provider is some type of provider.
 type Provider interface {
 	// Spinup provisions and benchmarks in one shot.
@@ -38,5 +44,5 @@ type Provider interface {
 	// List will list any provisioned instances created by corebench.
 	List(context.Context) error
 	// Term terminates instance provisioned by corebench.
-	Term(context.Context) error
+	Term(context.Context, ProviderTermSettings) error
 }

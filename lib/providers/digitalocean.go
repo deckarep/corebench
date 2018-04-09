@@ -99,7 +99,7 @@ func (p *DigitalOceanProvider) List(ctx context.Context) error {
 	return nil
 }
 
-func (p *DigitalOceanProvider) Term(ctx context.Context) error {
+func (p *DigitalOceanProvider) Term(ctx context.Context, settings ProviderTermSettings) error {
 	droplets, _, err := p.client.Droplets.ListByTag(ctx, "corebench", doDefaultPageOpts)
 	if err != nil {
 		return err
@@ -109,6 +109,8 @@ func (p *DigitalOceanProvider) Term(ctx context.Context) error {
 		fmt.Println("No corebench droplets to terminate on digitalocean")
 		return nil
 	}
+
+	// TODO: handle the ProviderTermSettings
 
 	totalCount := len(droplets)
 	termedCount := 0

@@ -41,3 +41,21 @@ func (do *DoSpinSettings) GitURL() string {
 func (do *DoSpinSettings) Cpus() string {
 	return do.Cpu
 }
+
+type DoTermSettings struct {
+	AllFlag  bool
+	IPFlag   string
+	NameFlag string
+}
+
+func (do *DoTermSettings) All() bool {
+	return do.AllFlag
+}
+
+func (do *DoTermSettings) ByIP() string {
+	return do.IPFlag
+}
+
+func (do *DoTermSettings) ByName() string {
+	return do.NameFlag
+}

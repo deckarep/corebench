@@ -38,16 +38,10 @@ var (
 func init() {
 	digitalOceanTermCmd.PersistentFlags().BoolVarP(&all,
 		"all", "", false, "indicates if you would like to terminate all instances")
-	// digitalOceanBenchCmd.PersistentFlags().StringVarP(&cpu,
-	// 	"cpu", "c", "", "cpu is a comma delimited list: -cpu=1,2,4,8 or -cpu=1-16")
-	// digitalOceanBenchCmd.PersistentFlags().StringVarP(&git,
-	// 	"git", "g", "", "git path to a git repo to clone from, this must be publicly accessable")
-	// digitalOceanBenchCmd.PersistentFlags().BoolVarP(&term,
-	// 	"term", "", true, "indicates whether corebench should auto-terminate instance(s) on complete")
-
-	// TODO: -benchmem flag (like go tooling)
-	// TODO: -regex flag (like go tooling)
-	// TODO: -race flag (like go tooling)
+	digitalOceanTermCmd.PersistentFlags().StringVarP(&name,
+		"name", "n", "", "terminate instance by droplet name")
+	digitalOceanTermCmd.PersistentFlags().StringVarP(&ip,
+		"ip", "i", "", "terminate instance by ip address")
 
 	digitalOceanCmd.AddCommand(digitalOceanTermCmd)
 }
@@ -56,9 +50,25 @@ var digitalOceanTermCmd = &cobra.Command{
 	Use:   "term",
 	Short: "terminates corebench resources provisioned on digitalocean that are currently alive",
 	Run: func(cmd *cobra.Command, args []string) {
-		provider := providers.NewDigitalOceanProvider(token)
 		ctx := context.Background()
-		err := provider.Term(ctx)
+
+		if all && (ip != "" || name != "") {
+			log.Fatal("You cannot choose --all and specify an --ip or --name at the same time.")
+		}
+
+		if ip != "" && name != "" {
+			log.Fatal("You can only terminate instances by their --ip or --name but not both.")
+		}
+
+		settings := &providers.DoTermSettings{
+			AllFlag:  all,
+			IPFlag:   ip,
+			NameFlag: name,
+		}
+
+		provider := providers.NewDigitalOceanProvider(token)
+
+		err := provider.Term(ctx, settings)
 		if err != nil {
 			log.Fatal(err)
 		}
