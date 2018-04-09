@@ -10,6 +10,21 @@ Let's find out:
 
 ### Example
 
+Create some parallel benchmarks for your codebase
+```go
+// BenchmarkSomething utilizes the `b.RunParallel` feature of Go's benchmarking suite.
+func BenchmarkSomething(b *testing.B) {
+    templ := template.Must(template.New("test").Parse("Hello, {{.}}!"))
+    b.RunParallel(func(pb *testing.PB) {
+        var buf bytes.Buffer
+        for pb.Next() {
+            buf.Reset()
+            templ.Execute(&buf, "World")
+        }
+    })
+}
+```
+
 Run this command
 ```sh
 ./corebench do bench --git github.com/{user}/{your-code} --cpu=1,2,4,8,16,32,48
