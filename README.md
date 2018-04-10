@@ -14,12 +14,10 @@ Create some parallel benchmarks for your codebase
 ```go
 // BenchmarkSomething utilizes the `b.RunParallel` feature of Go's benchmarking suite.
 func BenchmarkSomething(b *testing.B) {
-    templ := template.Must(template.New("test").Parse("Hello, {{.}}!"))
+    foo := NewFoo()
     b.RunParallel(func(pb *testing.PB) {
-        var buf bytes.Buffer
         for pb.Next() {
-            buf.Reset()
-            templ.Execute(&buf, "World")
+            foo.Bar()
         }
     })
 }
