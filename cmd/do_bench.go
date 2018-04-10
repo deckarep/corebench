@@ -35,25 +35,25 @@ var (
 	leaveRunning bool
 	git          string
 	benchMem     bool
+	regexString  string
 )
 
 // Usage: ./corebench do bench -t=$TOKEN -k=$SSH_FINGERPRINT -git github.com/deckarep/golang-set
 func init() {
 	digitalOceanBenchCmd.PersistentFlags().StringVarP(&keys,
-		"keys", "k", "", "keys allow you to embed ssh keys via their MD5 fingerprint id, comma delimited list")
+		"ssh-fp", "", "", "ssh fingerprints allow you to embed ssh keys via their MD5 fingerprint id, comma delimited list")
 	digitalOceanBenchCmd.PersistentFlags().StringVarP(&cpu,
 		"cpu", "c", "`nproc`", "cpu is a comma delimited list: -cpu=1,2,4,8 or -cpu=1-16")
 	digitalOceanBenchCmd.PersistentFlags().StringVarP(&git,
 		"git", "g", "", "git path to a git repo to clone from, this must be publicly accessable")
+	digitalOceanBenchCmd.PersistentFlags().StringVarP(&regexString,
+		"regex", "", "", "a regex to filter bench tests by")
 	digitalOceanBenchCmd.PersistentFlags().BoolVarP(&leaveRunning,
 		"leave-running", "", false, "indicates whether corebench should auto-terminate instance(s) on complete")
 	digitalOceanBenchCmd.PersistentFlags().BoolVarP(&benchMem,
 		"benchmem", "", false, "indicates whether corebench include allocations just like the go tool")
 
-	// TODO: -benchmem flag (like go tooling)
-	// TODO: -regex flag (like go tooling)
 	// TODO: -race flag (like go tooling)
-
 	digitalOceanCmd.AddCommand(digitalOceanBenchCmd)
 }
 
@@ -65,9 +65,10 @@ var digitalOceanBenchCmd = &cobra.Command{
 		ctx := context.Background()
 
 		settings := &providers.DoSpinSettings{
-			Git:      git,
-			Cpu:      cpu,
-			Benchmem: benchMem,
+			Git:       git,
+			Cpu:       cpu,
+			Benchmem:  benchMem,
+			RegexFlag: regexString,
 		}
 
 		provider := providers.NewDigitalOceanProvider(token)

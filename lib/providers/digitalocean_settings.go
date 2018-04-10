@@ -22,9 +22,10 @@ SOFTWARE.
 package providers
 
 type DoSpinSettings struct {
-	Git      string
-	Cpu      string
-	Benchmem bool
+	Git       string
+	Cpu       string
+	Benchmem  bool
+	RegexFlag string
 }
 
 func (do *DoSpinSettings) BenchMemString() string {
@@ -40,6 +41,13 @@ func (do *DoSpinSettings) GitURL() string {
 
 func (do *DoSpinSettings) Cpus() string {
 	return do.Cpu
+}
+
+func (do *DoSpinSettings) Regex() string {
+	if do.RegexFlag == "" {
+		return "."
+	}
+	return do.RegexFlag
 }
 
 type DoTermSettings struct {

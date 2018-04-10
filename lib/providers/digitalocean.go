@@ -58,7 +58,7 @@ runcmd:
   - echo "Finished corebench initialization"
 `
 	benchReadyScript     = "while [ ! -f /opt/corebench/.core-init ]; do sleep 1; done"
-	benchCommandTemplate = `cd /opt/corebench/${git-repo-last-path} && /usr/local/go/bin/go test ${benchmem-setting}-cpu ${cpu-count} -bench=.`
+	benchCommandTemplate = `cd /opt/corebench/${git-repo-last-path} && /usr/local/go/bin/go test ${benchmem-setting}-cpu ${cpu-count} -bench=${bench-regex}`
 )
 
 type DigitalOceanProvider struct {
@@ -154,6 +154,8 @@ func (p *DigitalOceanProvider) processBenchCommandTemplate(settings ProviderSpin
 		strings.Replace(benchCmd, "${cpu-count}", settings.Cpus(), -1)
 	benchCmd =
 		strings.Replace(benchCmd, "${benchmem-setting}", settings.BenchMemString(), -1)
+	benchCmd =
+		strings.Replace(benchCmd, "${bench-regex}", settings.Regex(), -1)
 
 	return fmt.Sprintf("%s && %s", benchReadyScript, benchCmd)
 }

@@ -27,6 +27,7 @@ type ProviderSpinSettings interface {
 	GitURL() string
 	Cpus() string
 	BenchMemString() string
+	Regex() string
 }
 
 type ProviderTermSettings interface {
