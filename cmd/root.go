@@ -25,7 +25,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Entry point into the tool.
+// RootCmd is the entry point into the corebench tool.
 var RootCmd = &cobra.Command{
 	Use:   "corebench",
 	Short: "corebench: a benchmarking tool",

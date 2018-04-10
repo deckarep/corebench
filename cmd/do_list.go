@@ -33,19 +33,7 @@ var ()
 
 // Usage: ./corebench do bench -t=$TOKEN -k=$SSH_FINGERPRINT -git github.com/deckarep/golang-set
 func init() {
-	// digitalOceanBenchCmd.PersistentFlags().StringVarP(&keys,
-	// 	"keys", "k", "", "keys allow you to embed ssh keys via their MD5 fingerprint id, comma delimited list")
-	// digitalOceanBenchCmd.PersistentFlags().StringVarP(&cpu,
-	// 	"cpu", "c", "", "cpu is a comma delimited list: -cpu=1,2,4,8 or -cpu=1-16")
-	// digitalOceanBenchCmd.PersistentFlags().StringVarP(&git,
-	// 	"git", "g", "", "git path to a git repo to clone from, this must be publicly accessable")
-	// digitalOceanBenchCmd.PersistentFlags().BoolVarP(&term,
-	// 	"term", "", true, "indicates whether corebench should auto-terminate instance(s) on complete")
-
-	// TODO: -benchmem flag (like go tooling)
-	// TODO: -regex flag (like go tooling)
 	// TODO: -race flag (like go tooling)
-
 	digitalOceanCmd.AddCommand(digitalOceanListCmd)
 }
 
