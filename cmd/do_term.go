@@ -52,6 +52,10 @@ var digitalOceanTermCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
+		if ip == "" && name == "" && !all {
+			log.Fatal("You must choose an option to terminate instances: either --all, --ip, or --name")
+		}
+
 		if all && (ip != "" || name != "") {
 			log.Fatal("You cannot choose --all and specify an --ip or --name at the same time.")
 		}

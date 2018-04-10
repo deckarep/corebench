@@ -30,9 +30,7 @@ type ProviderSpinSettings interface {
 }
 
 type ProviderTermSettings interface {
-	All() bool
-	ByIP() string
-	ByName() string
+	ShouldTerm(name, ip string) bool
 }
 
 // Provider is some type of provider.

@@ -48,14 +48,9 @@ type DoTermSettings struct {
 	NameFlag string
 }
 
-func (do *DoTermSettings) All() bool {
-	return do.AllFlag
-}
-
-func (do *DoTermSettings) ByIP() string {
-	return do.IPFlag
-}
-
-func (do *DoTermSettings) ByName() string {
-	return do.NameFlag
+func (do *DoTermSettings) ShouldTerm(name, ip string) bool {
+	if do.AllFlag || do.NameFlag == name || do.IPFlag == ip {
+		return true
+	}
+	return false
 }

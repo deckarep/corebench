@@ -106,24 +106,30 @@ func (p *DigitalOceanProvider) Term(ctx context.Context, settings ProviderTermSe
 	}
 
 	if len(droplets) == 0 {
-		fmt.Println("No corebench droplets to terminate on digitalocean")
+		fmt.Println("No corebench droplets are alive to terminate on digitalocean")
 		return nil
 	}
-
-	// TODO: handle the ProviderTermSettings
 
 	totalCount := len(droplets)
 	termedCount := 0
 	for _, droplet := range droplets {
-		_, err := p.client.Droplets.Delete(ctx, droplet.ID)
-		if err != nil {
-			log.Println("Failed to terminate droplet: need to retry or delete it manually or you will billed!!!", droplet.ID)
-			continue
+		ip, _ := droplet.PublicIPv4()
+		if settings.ShouldTerm(droplet.Name, ip) {
+			log.Println("Terminating:", droplet.ID, droplet.Name, ip, "against match")
+			_, err := p.client.Droplets.Delete(ctx, droplet.ID)
+			if err != nil {
+				log.Println("Failed to terminate droplet: need to retry or delete it manually or you will billed!!!", droplet.ID)
+				continue
+			}
+			termedCount++
 		}
-		termedCount++
 	}
 
-	fmt.Printf("Terminated (%d) droplets out of (%d) total droplets found\n", termedCount, totalCount)
+	if termedCount == 0 {
+		log.Println("No instances were terminated that matched criteria")
+	} else {
+		fmt.Printf("Terminated (%d) droplets out of (%d) total droplets found\n", termedCount, totalCount)
+	}
 
 	return nil
 }
