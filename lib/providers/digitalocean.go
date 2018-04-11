@@ -145,6 +145,8 @@ func (p *DigitalOceanProvider) Sizes(ctx context.Context) error {
 		fmt.Fprintln(w, fmt.Sprintf("%s\t%d\t%d\t%.2f\t%s\t%s\t", sz.Slug, sz.Vcpus, sz.Memory, sz.PriceHourly, avStatus, filterUSRegions(sz.Regions)))
 	}
 	w.Flush()
+	fmt.Println()
+	fmt.Printf("(%d) droplet sizes found\n", len(sizes))
 
 	return nil
 }
