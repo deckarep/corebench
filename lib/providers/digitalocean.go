@@ -25,7 +25,9 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strings"
+	"text/tabwriter"
 	"time"
 
 	"github.com/deckarep/corebench/lib/ssh"
@@ -59,6 +61,13 @@ runcmd:
 `
 	benchReadyScript     = "while [ ! -f /opt/corebench/.core-init ]; do sleep 1; done"
 	benchCommandTemplate = `cd /opt/corebench/${git-repo-last-path} && /usr/local/go/bin/go test ${benchmem-setting}-cpu ${cpu-count} -bench=${bench-regex}`
+	// doUSRegions are the US regions for digital ocean, let's start with this.
+	doUSRegions = map[string]bool{
+		"nyc1": true,
+		"nyc2": true,
+		"sfo1": true,
+		"sfo2": true,
+	}
 )
 
 type DigitalOceanProvider struct {
@@ -95,6 +104,47 @@ func (p *DigitalOceanProvider) List(ctx context.Context) error {
 		ip, _ := d.PublicIPv4()
 		fmt.Println(d.ID, d.Name, ip, d.Created)
 	}
+
+	return nil
+}
+
+func filterUSRegions(regions []string) string {
+	var results []string
+	for _, reg := range regions {
+		if _, ok := doUSRegions[reg]; ok {
+			results = append(results, reg)
+		}
+	}
+	return strings.Join(results, ", ")
+}
+
+func (p *DigitalOceanProvider) Sizes(ctx context.Context) error {
+	sizes, _, err := p.client.Sizes.List(ctx, doDefaultPageOpts)
+	if err != nil {
+		return err
+	}
+
+	const padding = 2
+	w := tabwriter.NewWriter(os.Stdout, 0, 8, padding, '\t', tabwriter.AlignRight)
+	fmt.Println("Digital Ocean Droplet Sizes")
+	fmt.Println()
+	fmt.Fprintln(w, fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%s\t", "Slug", "VCpus", "MB", "$/HR", "Avail", "Regions"))
+	fmt.Fprintln(w, fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%s\t",
+		strings.Repeat("-", len("Slug")),
+		strings.Repeat("-", len("VCpus")),
+		strings.Repeat("-", len("MB")),
+		strings.Repeat("-", len("$/HR")),
+		strings.Repeat("-", len("Avail")),
+		strings.Repeat("-", len("Regions"))))
+
+	for _, sz := range sizes {
+		avStatus := "yes"
+		if !sz.Available {
+			avStatus = "no"
+		}
+		fmt.Fprintln(w, fmt.Sprintf("%s\t%d\t%d\t%.2f\t%s\t%s\t", sz.Slug, sz.Vcpus, sz.Memory, sz.PriceHourly, avStatus, filterUSRegions(sz.Regions)))
+	}
+	w.Flush()
 
 	return nil
 }

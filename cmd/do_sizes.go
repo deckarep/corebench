@@ -19,31 +19,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package providers
+package cmd
 
-import "context"
+import (
+	"context"
+	"log"
 
-type ProviderSpinSettings interface {
-	GitURL() string
-	Cpus() string
-	BenchMemString() string
-	Regex() string
+	"github.com/deckarep/corebench/lib/providers"
+	"github.com/spf13/cobra"
+)
+
+func init() {
+	digitalOceanCmd.AddCommand(digitalOceanSizesCmd)
 }
 
-type ProviderTermSettings interface {
-	ShouldTerm(name, ip string) bool
-}
-
-// Provider is some type of provider.
-type Provider interface {
-	// Spinup provisions and benchmarks in one shot.
-	Spinup(context.Context, ProviderSpinSettings) error
-	// SetKeys allows you to specify your SSH keys to be installed on the resource.
-	SetKeys(keys []string)
-	// List will list any provisioned instances created by corebench.
-	List(context.Context) error
-	// Term terminates instance provisioned by corebench.
-	Term(context.Context, ProviderTermSettings) error
-	// Sizes lists the box sizes that can be provisioned by the provider.
-	Sizes(context.Context) error
+var digitalOceanSizesCmd = &cobra.Command{
+	Use:   "sizes",
+	Short: "sizes shows the digital ocean slug sizes and their costs",
+	Run: func(cmd *cobra.Command, args []string) {
+		provider := providers.NewDigitalOceanProvider(token)
+		ctx := context.Background()
+		err := provider.Sizes(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
+	},
 }
