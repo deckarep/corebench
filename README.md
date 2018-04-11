@@ -78,7 +78,7 @@ Benchmark completed...tearing down droplet.
 * Sometimes an algorithm looks great on a few cores, but performance dramatically drops off when the core count gets higher
 * A larger number of cores often times illustrates performances problems around:
 * * Contention/locking bottlenecks
-* * Cache incoherence
+* * Cache coherence issues
 * * Parallelization overhead or lack of parallelization at all
 * * Multi-threading overhead: starvation, race conditions, live-locks and priority inversion
 * * The list goes on...
