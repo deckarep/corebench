@@ -125,17 +125,25 @@ func (p *DigitalOceanProvider) Sizes(ctx context.Context) error {
 	}
 
 	const padding = 2
+	const slugHdr = "Slug"
+	const vcpuHdr = "VCpus"
+	const mbHdr = "MB"
+	const hourlyRateHdr = "$/HR"
+	const availHdr = "Avail"
+	const regHdr = "Regions"
+
 	w := tabwriter.NewWriter(os.Stdout, 0, 8, padding, '\t', tabwriter.AlignRight)
+
 	fmt.Println("Digital Ocean Droplet Sizes")
 	fmt.Println()
-	fmt.Fprintln(w, fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%s\t", "Slug", "VCpus", "MB", "$/HR", "Avail", "Regions"))
+	fmt.Fprintln(w, fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%s\t", slugHdr, vcpuHdr, mbHdr, hourlyRateHdr, availHdr, regHdr))
 	fmt.Fprintln(w, fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%s\t",
-		strings.Repeat("-", len("Slug")),
-		strings.Repeat("-", len("VCpus")),
-		strings.Repeat("-", len("MB")),
-		strings.Repeat("-", len("$/HR")),
-		strings.Repeat("-", len("Avail")),
-		strings.Repeat("-", len("Regions"))))
+		strings.Repeat("-", len(slugHdr)),
+		strings.Repeat("-", len(vcpuHdr)),
+		strings.Repeat("-", len(mbHdr)),
+		strings.Repeat("-", len(hourlyRateHdr)),
+		strings.Repeat("-", len(availHdr)),
+		strings.Repeat("-", len(regHdr))))
 
 	for _, sz := range sizes {
 		avStatus := "yes"
