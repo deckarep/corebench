@@ -74,8 +74,9 @@ func PollSSH(host string) error {
 	for {
 		client, err := ssh.Dial("tcp", host, sshConfig)
 		if err != nil {
+			// Due to Go's error handling semantics...only way I can detect the error is
+			// to inspect the string. :/
 			if !strings.Contains(err.Error(), "unable to authenticate") {
-				//log.Println("Failed to poll ssh, trying again: ", err)
 				time.Sleep(time.Second * 1)
 				continue
 			}

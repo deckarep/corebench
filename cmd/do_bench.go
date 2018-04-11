@@ -23,6 +23,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/deckarep/corebench/lib/providers"
@@ -77,6 +78,7 @@ var digitalOceanBenchCmd = &cobra.Command{
 			provider.SetKeys(strings.Split(keys, ","))
 		}
 
+		fmt.Println()
 		provider.Spinup(ctx, settings)
 	},
 }

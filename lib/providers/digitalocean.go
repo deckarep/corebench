@@ -46,7 +46,7 @@ var (
 		PerPage: 200,
 	}
 
-	goVersion         = "go1.9.1.linux-amd64.tar.gz"
+	goVersion         = "go1.10.1.linux-amd64.tar.gz"
 	cloudInitTemplate = `
 #cloud-config
 runcmd:
@@ -60,7 +60,7 @@ runcmd:
   - echo "Finished corebench initialization"
 `
 	benchReadyScript     = "while [ ! -f /opt/corebench/.core-init ]; do sleep 1; done"
-	benchCommandTemplate = `cd /opt/corebench/${git-repo-last-path} && /usr/local/go/bin/go test ${benchmem-setting}-cpu ${cpu-count} -bench=${bench-regex}`
+	benchCommandTemplate = `cd /opt/corebench/${git-repo-last-path} && /usr/local/go/bin/go version && /usr/local/go/bin/go test ${benchmem-setting}-cpu ${cpu-count} -bench=${bench-regex}`
 	// doUSRegions are the US regions for digital ocean, let's start with this.
 	doUSRegions = map[string]bool{
 		"nyc1": true,
@@ -231,7 +231,7 @@ func (p *DigitalOceanProvider) Spinup(ctx context.Context, settings ProviderSpin
 	if len(p.sshKeys) > 0 {
 		var dropKeys []godo.DropletCreateSSHKey
 		for _, k := range p.sshKeys {
-			println("adding ssh key: ", k)
+			//println("adding ssh key: ", k)
 			dropKeys = append(dropKeys, godo.DropletCreateSSHKey{
 				Fingerprint: k,
 			})
@@ -239,21 +239,21 @@ func (p *DigitalOceanProvider) Spinup(ctx context.Context, settings ProviderSpin
 		createRequest.SSHKeys = dropKeys
 	}
 
-	fmt.Printf("Provisioning droplet: %s...\n", createRequest.Name)
 	newDroplet, _, err := p.client.Droplets.Create(ctx, createRequest)
 	if err != nil {
 		fmt.Printf("Failed to create droplet with err: %s\n", err)
 		return err
 	}
 
-	fmt.Println(newDroplet.Name)
-	fmt.Println(newDroplet.ID)
-	fmt.Println(newDroplet.PublicIPv4())
+	fmt.Printf("Provisioning droplet: %s ...\n", newDroplet.Name)
 
-	// Capture the droplets because need to delete at the end.
+	// fmt.Println(newDroplet.Name)
+	// fmt.Println(newDroplet.ID)
+	// fmt.Println(newDroplet.PublicIPv4())
+
+	// Capture the droplets by id because we should delete at the end.
 	// TODO: retry the deletes
-	// TODO: capture panics and ensure we delete even still
-	// TODO: document the repo, user is responsible for charges
+	// TODO: recover panics and ensure the delete operation happens.
 	var allDropletIds []int
 	defer func() {
 		for _, id := range allDropletIds {
@@ -269,14 +269,9 @@ func (p *DigitalOceanProvider) Spinup(ctx context.Context, settings ProviderSpin
 	const maxDialAttempts = 20
 
 	// Spin wait - TODO: make this more graceful.
-	opt := &godo.ListOptions{
-		Page:    1,
-		PerPage: 200,
-	}
-
 advance_to_ssh:
 	for {
-		droplets, _, err := p.client.Droplets.ListByTag(ctx, "corebench", opt)
+		droplets, _, err := p.client.Droplets.ListByTag(ctx, "corebench", doDefaultPageOpts)
 		if err != nil {
 			log.Fatal("Couldn't list all droplets with err: ", err)
 		}
@@ -286,14 +281,14 @@ advance_to_ssh:
 		for _, d := range droplets {
 			allDropletIds = append(allDropletIds, d.ID)
 			ip, _ := d.PublicIPv4()
-			fmt.Println(d.Name, d.ID, ip)
+			//fmt.Println(d.Name, d.ID, ip)
 			// if we have an ip, start attempting...
 			if ip != "" {
 				chosenIP = ip
 				err = ssh.PollSSH(chosenIP + ":22")
 				//conn, err := net.DialTimeout("tcp", chosenIP+":22", time.Duration(time.Millisecond*500))
 				if err == nil {
-					println("ssh dial success continuing!")
+					//println("ssh dial success continuing!")
 					break advance_to_ssh
 				}
 			}
@@ -301,6 +296,7 @@ advance_to_ssh:
 		time.Sleep(time.Second * 3)
 	}
 
+	fmt.Println("Droplet is provisioned and reachable at ip:", chosenIP)
 	benchCmd := p.processBenchCommandTemplate(settings)
 	err = ssh.ExecuteSSH(chosenIP, benchCmd)
 	if err != nil {
