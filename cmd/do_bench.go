@@ -24,6 +24,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/deckarep/corebench/lib/providers"
@@ -34,7 +35,6 @@ var (
 	keys         string
 	cpu          string
 	leaveRunning bool
-	git          string
 	benchMem     bool
 	regexString  string
 )
@@ -45,8 +45,6 @@ func init() {
 		"ssh-fp", "", "", "ssh fingerprints allow you to embed ssh keys via their MD5 fingerprint id, comma delimited list")
 	digitalOceanBenchCmd.PersistentFlags().StringVarP(&cpu,
 		"cpu", "c", "`nproc`", "cpu is a comma delimited list: -cpu=1,2,4,8 or -cpu=1-16")
-	digitalOceanBenchCmd.PersistentFlags().StringVarP(&git,
-		"git", "g", "", "git path to a git repo to clone from, this must be publicly accessable")
 	digitalOceanBenchCmd.PersistentFlags().StringVarP(&regexString,
 		"regex", "", "", "a regex to filter bench tests by")
 	digitalOceanBenchCmd.PersistentFlags().BoolVarP(&leaveRunning,
@@ -65,8 +63,12 @@ var digitalOceanBenchCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 
+		if len(args) == 0 {
+			log.Fatal("You must specificy a git repo to bench: https://github.com/foo/bar")
+		}
+
 		settings := &providers.DoSpinSettings{
-			Git:       git,
+			Git:       args[0],
 			Cpu:       cpu,
 			Benchmem:  benchMem,
 			RegexFlag: regexString,

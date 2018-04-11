@@ -245,7 +245,9 @@ func (p *DigitalOceanProvider) Spinup(ctx context.Context, settings ProviderSpin
 		return err
 	}
 
-	fmt.Printf("Provisioning droplet: %s ...\n", newDroplet.Name)
+	fmt.Printf("Provisioning Droplet: %s ...\n", newDroplet.Name)
+	fmt.Println("Slug:", createRequest.Size)
+	fmt.Println("Region:", createRequest.Region)
 
 	// fmt.Println(newDroplet.Name)
 	// fmt.Println(newDroplet.ID)
@@ -296,6 +298,8 @@ advance_to_ssh:
 	}
 
 	fmt.Println("Droplet is provisioned and reachable at ip:", chosenIP)
+	fmt.Println("Droplet benchmark starting momentarily...")
+	fmt.Println()
 	benchCmd := p.processBenchCommandTemplate(settings)
 	err = ssh.ExecuteSSH(chosenIP, benchCmd)
 	if err != nil {

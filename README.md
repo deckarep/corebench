@@ -25,7 +25,7 @@ func BenchmarkSomething(b *testing.B) {
 
 Run this command
 ```sh
-./corebench do bench --git github.com/{user}/{your-code} --cpu=1,2,4,8,16,32,48
+./corebench do bench --cpu=1,2,4,8,16,32,48 github.com/{user}/{your-code} 
 ```
 
 See this output
