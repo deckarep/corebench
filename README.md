@@ -73,6 +73,7 @@ Benchmark completed...tearing down droplet.
 * A source repo with comprehensive benchmarks to run against this suite
 
 ### Why benchmark on a large set of cores?
+* If you work in Go chances are you care about concurrent and parallel performance. If you don't care why are using Go at all?
 * Developers often benchmark their code on developer workstations, with a small number of cores
 * Benchmarks on a small number of cores often times don't reflect the true nature of your application
 * Sometimes an algorithm looks great on a few cores, but performance dramatically drops off when the core count gets higher
