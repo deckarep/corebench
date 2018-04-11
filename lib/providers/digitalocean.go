@@ -286,7 +286,6 @@ advance_to_ssh:
 			if ip != "" {
 				chosenIP = ip
 				err = ssh.PollSSH(chosenIP + ":22")
-				//conn, err := net.DialTimeout("tcp", chosenIP+":22", time.Duration(time.Millisecond*500))
 				if err == nil {
 					//println("ssh dial success continuing!")
 					break advance_to_ssh
