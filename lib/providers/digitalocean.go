@@ -38,6 +38,24 @@ import (
 
 const (
 	doProviderInstanceNameFmt = "corebench-digitalocean-%s"
+	cloudInitTemplate         = `
+#cloud-config
+runcmd:
+  - echo "Setting up corebench for the first time..."
+  - echo "Installing dependencies..."
+  - apt-get -y install git
+  - wget https://storage.googleapis.com/golang/${go-version}
+  - tar -C /usr/local -xzf ${go-version}
+  - export GOPATH=/root/go
+  - mkdir -p $GOPATH
+  - /usr/local/go/bin/go get ${git-repo}
+  - touch $GOPATH/.core-init
+  - echo "Finished corebench initialization"
+`
+	benchReadyScript     = "export GOPATH=/root/go && while [ ! -f $GOPATH/.core-init ]; do sleep 1; done"
+	benchCommandTemplate = `cd $GOPATH/src/${git-repo} && /usr/local/go/bin/go version && /usr/local/go/bin/go test ${benchmem-setting}-cpu ${cpu-count} -bench=${bench-regex}`
+	latestGoVersion      = "1.10.1"
+	goVersion            = "go1.10.1.linux-amd64.tar.gz"
 )
 
 var (
@@ -46,21 +64,6 @@ var (
 		PerPage: 200,
 	}
 
-	goVersion         = "go1.10.1.linux-amd64.tar.gz"
-	cloudInitTemplate = `
-#cloud-config
-runcmd:
-  - echo "Setting up corebench for the first time..."
-  - echo "Installing dependencies..."
-  - apt-get -y install git
-  - wget https://storage.googleapis.com/golang/${go-version}
-  - tar -C /usr/local -xzf ${go-version}
-  - git clone ${git-repo} /opt/corebench/${git-repo-last-path}
-  - touch /opt/corebench/.core-init
-  - echo "Finished corebench initialization"
-`
-	benchReadyScript     = "while [ ! -f /opt/corebench/.core-init ]; do sleep 1; done"
-	benchCommandTemplate = `cd /opt/corebench/${git-repo-last-path} && /usr/local/go/bin/go version && /usr/local/go/bin/go test ${benchmem-setting}-cpu ${cpu-count} -bench=${bench-regex}`
 	// doUSRegions are the US regions for digital ocean, let's start with this.
 	doUSRegions = map[string]bool{
 		"nyc1": true,
@@ -209,7 +212,7 @@ func (p *DigitalOceanProvider) processCloudInitTemplate(settings ProviderSpinSet
 
 func (p *DigitalOceanProvider) processBenchCommandTemplate(settings ProviderSpinSettings) string {
 	benchCmd :=
-		strings.Replace(benchCommandTemplate, "${git-repo-last-path}", p.repoLastPath, -1)
+		strings.Replace(benchCommandTemplate, "${git-repo}", settings.GitURL(), -1)
 	benchCmd =
 		strings.Replace(benchCmd, "${cpu-count}", settings.Cpus(), -1)
 	benchCmd =
@@ -221,6 +224,11 @@ func (p *DigitalOceanProvider) processBenchCommandTemplate(settings ProviderSpin
 }
 
 func (p *DigitalOceanProvider) Spinup(ctx context.Context, settings ProviderSpinSettings) error {
+
+	//log.Fatal(p.processCloudInitTemplate(settings))
+
+	//log.Fatal(p.processBenchCommandTemplate(settings))
+
 	createRequest := &godo.DropletCreateRequest{
 		Name: fmt.Sprintf(doProviderInstanceNameFmt, utility.NewInstanceID()),
 		// Costs: .01 penny to turn on (test with this)
@@ -265,15 +273,11 @@ func (p *DigitalOceanProvider) Spinup(ctx context.Context, settings ProviderSpin
 	// TODO: retry the deletes
 	// TODO: recover panics and ensure the delete operation happens.
 	var allDropletIds []int
-	defer func() {
-		for _, id := range allDropletIds {
-			fmt.Println("Cleaning up droplet:", id)
-			_, err := p.client.Droplets.Delete(ctx, id)
-			if err != nil {
-				log.Fatal("Failed to delete droplet: need to retry or delete it manually or you will billed!!!", id)
-			}
-		}
-	}()
+	if !settings.LeaveRunning() {
+		defer func() {
+			p.cleanup(ctx, allDropletIds)
+		}()
+	}
 
 	var chosenIP string
 	const maxDialAttempts = 20
@@ -315,4 +319,14 @@ advance_to_ssh:
 	}
 
 	return nil
+}
+
+func (p *DigitalOceanProvider) cleanup(ctx context.Context, ids []int) {
+	for _, id := range ids {
+		fmt.Println("Cleaning up droplet:", id)
+		_, err := p.client.Droplets.Delete(ctx, id)
+		if err != nil {
+			log.Fatal("Failed to delete droplet: need to retry or delete it manually or you will billed!!!", id)
+		}
+	}
 }

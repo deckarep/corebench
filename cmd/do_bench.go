@@ -68,10 +68,11 @@ var digitalOceanBenchCmd = &cobra.Command{
 		}
 
 		settings := &providers.DoSpinSettings{
-			Git:       args[0],
-			Cpu:       cpu,
-			Benchmem:  benchMem,
-			RegexFlag: regexString,
+			Git:              args[0],
+			Cpu:              cpu,
+			Benchmem:         benchMem,
+			RegexFlag:        regexString,
+			LeaveRunningFlag: leaveRunning,
 		}
 
 		provider := providers.NewDigitalOceanProvider(token)

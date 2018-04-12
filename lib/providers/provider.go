@@ -28,6 +28,7 @@ type ProviderSpinSettings interface {
 	Cpus() string
 	BenchMemString() string
 	Regex() string
+	LeaveRunning() bool
 }
 
 type ProviderTermSettings interface {
