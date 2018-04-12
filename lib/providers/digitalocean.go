@@ -24,11 +24,12 @@ package providers
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"text/tabwriter"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/deckarep/corebench/lib/ssh"
 	"github.com/deckarep/corebench/lib/utility"
@@ -99,13 +100,20 @@ func (p *DigitalOceanProvider) List(ctx context.Context) error {
 	}
 
 	if len(droplets) == 0 {
-		fmt.Println("No corebench droplets are provisioned on digitalocean")
+		log.Info("No corebench droplets are provisioned on digitalocean")
 		return nil
 	}
 
 	for _, d := range droplets {
 		ip, _ := d.PublicIPv4()
-		fmt.Println(d.ID, d.Name, ip, d.Created)
+		log.WithFields(
+			log.Fields{
+				"id":      d.ID,
+				"name":    d.Name,
+				"ip":      ip,
+				"created": d.Created,
+			},
+		)
 	}
 
 	return nil
@@ -157,7 +165,7 @@ func (p *DigitalOceanProvider) Sizes(ctx context.Context) error {
 	}
 	w.Flush()
 	fmt.Println()
-	fmt.Printf("(%d) droplet sizes found\n", len(sizes))
+	log.Infof("(%d) droplet sizes found\n", len(sizes))
 
 	return nil
 }
@@ -169,7 +177,7 @@ func (p *DigitalOceanProvider) Term(ctx context.Context, settings ProviderTermSe
 	}
 
 	if len(droplets) == 0 {
-		fmt.Println("No corebench droplets are alive to terminate on digitalocean")
+		log.Info("No corebench droplets are alive to terminate on digitalocean")
 		return nil
 	}
 
@@ -178,10 +186,10 @@ func (p *DigitalOceanProvider) Term(ctx context.Context, settings ProviderTermSe
 	for _, droplet := range droplets {
 		ip, _ := droplet.PublicIPv4()
 		if settings.ShouldTerm(droplet.Name, ip) {
-			log.Println("Terminating:", droplet.ID, droplet.Name, ip, "against match")
+			log.Info("Terminating:", droplet.ID, droplet.Name, ip, "against match")
 			_, err := p.client.Droplets.Delete(ctx, droplet.ID)
 			if err != nil {
-				log.Println("Failed to terminate droplet: need to retry or delete it manually or you will billed!!!", droplet.ID)
+				log.WithField("id", droplet.ID).Warning("Failed to terminate droplet: need to retry or delete it manually or you will billed!!!")
 				continue
 			}
 			termedCount++
@@ -189,9 +197,9 @@ func (p *DigitalOceanProvider) Term(ctx context.Context, settings ProviderTermSe
 	}
 
 	if termedCount == 0 {
-		log.Println("No instances were terminated that matched criteria")
+		log.Warning("No instances were terminated that matched criteria")
 	} else {
-		fmt.Printf("Terminated (%d) droplets out of (%d) total droplets found\n", termedCount, totalCount)
+		log.Infof("Terminated (%d) droplets out of (%d) total droplets found\n", termedCount, totalCount)
 	}
 
 	return nil
@@ -257,13 +265,13 @@ func (p *DigitalOceanProvider) Spinup(ctx context.Context, settings ProviderSpin
 
 	newDroplet, _, err := p.client.Droplets.Create(ctx, createRequest)
 	if err != nil {
-		fmt.Printf("Failed to create droplet with err: %s\n", err)
+		log.Error("Failed to create droplet with err: %s\n", err)
 		return err
 	}
 
-	fmt.Printf("Provisioning Droplet: %s ...\n", newDroplet.Name)
-	fmt.Println("Slug:", createRequest.Size)
-	fmt.Println("Region:", createRequest.Region)
+	log.Infof("Provisioning Droplet: %s ...\n", newDroplet.Name)
+	log.Info("Slug:", createRequest.Size)
+	log.Info("Region:", createRequest.Region)
 
 	// fmt.Println(newDroplet.Name)
 	// fmt.Println(newDroplet.ID)
@@ -309,13 +317,13 @@ advance_to_ssh:
 		time.Sleep(time.Second * 3)
 	}
 
-	fmt.Println("Droplet is provisioned and reachable at ip:", chosenIP)
-	fmt.Println("Droplet benchmark starting momentarily...")
+	log.Info("Droplet is provisioned and reachable at ip:", chosenIP)
+	log.Info("Droplet benchmark starting momentarily...")
 	fmt.Println()
 	benchCmd := p.processBenchCommandTemplate(settings)
 	err = ssh.ExecuteSSH(chosenIP, benchCmd)
 	if err != nil {
-		fmt.Println("Failed to SSH: ", err)
+		log.Fatalln("Failed to SSH: ", err)
 	}
 
 	return nil
@@ -323,7 +331,7 @@ advance_to_ssh:
 
 func (p *DigitalOceanProvider) cleanup(ctx context.Context, ids []int) {
 	for _, id := range ids {
-		fmt.Println("Cleaning up droplet:", id)
+		log.Info("Cleaning up droplet:", id)
 		_, err := p.client.Droplets.Delete(ctx, id)
 		if err != nil {
 			log.Fatal("Failed to delete droplet: need to retry or delete it manually or you will billed!!!", id)

@@ -24,10 +24,10 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/deckarep/corebench/lib/providers"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -64,7 +64,7 @@ var digitalOceanBenchCmd = &cobra.Command{
 		ctx := context.Background()
 
 		if len(args) == 0 {
-			log.Fatal("You must specificy a git repo to bench: https://github.com/foo/bar")
+			log.WithField("example_repo", "github.com/foo/bar").Fatal("You must specify a git repo to bench")
 		}
 
 		settings := &providers.DoSpinSettings{

@@ -23,7 +23,8 @@ package cmd
 
 import (
 	"context"
-	"log"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/deckarep/corebench/lib/providers"
 	"github.com/spf13/cobra"
