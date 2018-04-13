@@ -92,7 +92,7 @@ Benchmark completed...tearing down droplet.
  - A: The default behavior is the server is destroyed along with the code and benchmark data. There is a setting that allows you to leave the server running if you'd like to log in and inspect the results using the --leave-running flag.
 
  - Q: Why is DigitalOcean the first provider?
- - A: Easy, because their droplets fire up the FAST allowing a quick feedback loop during development of this project.
+ - A: Easy, because their droplets fire up *FAST* allowing a quick feedback loop during development of this project.
 
  - Q: When you will you add Google Cloud, AWS, {other-provider} next?
  - A: Google Cloud is next because they offer per minute billing which is great to save money. I'm hoping the community can help me build other providers along with refactoring as necessary to align the API.
