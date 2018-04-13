@@ -84,6 +84,32 @@ Benchmark completed...tearing down droplet.
 * * Multi-threading overhead: starvation, race conditions, live-locks and priority inversion
 * * The list goes on...
 
+### F.A.Q.
+ - Q: Why is 48 the max amount of cores this utility supports?
+ - A: Because DigitalOcean is the first provider and that is their beefiest box.
+
+ - Q: What happens to the server and the code after the benchmark completes?
+ - A: The default behavior is the server is destroyed along with the code and benchmark data. There is a setting that allows you to leave the server running if you'd like to log in and inspect the results using the --leave-running flag.
+
+ - Q: Why is DigitalOcean the first provider?
+ - A: Easy, because their droplets fire up the FAST allowing a quick feedback loop during development of this project.
+
+ - Q: When you will you add Google Cloud, AWS, {other-provider} next?
+ - A: Google Cloud is next because they offer per minute billing which is great to save money. I'm hoping the community can help me build other providers along with refactoring as necessary to align the API.
+
+ - Q: Why did you build this tool?
+ - A: Because I wanted to quick way to execute remote benchmarks on cloud servers that are beefy (large number of cores).
+
+ - Q: Will you eventually support other languages?
+ - A: Meybe. :) Did I mention this code is open source?
+
+ - Q: Why is your code sloppy?
+ - A: Because I'm currently in rapid prototype mode...don't worry it will get a lot better. Also through the power of open-source...yada, yada, yada.
+
+ - Q: Doesn't this cost money everytime you need to fire up a benchmark?
+ - A: Yes, yes it does...you have been warned.
+ - A: If you want to test-drive, you can use a weak single core instance which costs like a penny an hour.
+
 ### Caution:
 * This utility is in active development, API is in flux and is expected to change
 * This project and its maintainers are NOT responsible for any monetary charges, overages, fees as a result of the auto-provision process during proper usage of the script, bugs in the script or because you decided to leave a cloud server running for months
