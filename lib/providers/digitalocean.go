@@ -129,12 +129,17 @@ func filterUSRegions(regions []string) string {
 	return strings.Join(results, ", ")
 }
 
-func (p *DigitalOceanProvider) Sizes(ctx context.Context) error {
-	sizes, _, err := p.client.Sizes.List(ctx, doDefaultPageOpts)
-	if err != nil {
-		return err
+func filterSizes(sizes []godo.Size, predicate func(slug string) bool) []godo.Size {
+	var filteredSizes []godo.Size
+	for _, s := range sizes {
+		if predicate(s.Slug) {
+			filteredSizes = append(filteredSizes, s)
+		}
 	}
+	return filteredSizes
+}
 
+func displaySizes(category string, sizes []godo.Size) {
 	const padding = 2
 	const slugHdr = "Slug"
 	const vcpuHdr = "VCpus"
@@ -144,8 +149,7 @@ func (p *DigitalOceanProvider) Sizes(ctx context.Context) error {
 	const regHdr = "Regions"
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 8, padding, '\t', tabwriter.AlignRight)
-
-	fmt.Println("Digital Ocean Droplet Sizes")
+	fmt.Println(category)
 	fmt.Println()
 	fmt.Fprintln(w, fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%s\t", slugHdr, vcpuHdr, mbHdr, hourlyRateHdr, availHdr, regHdr))
 	fmt.Fprintln(w, fmt.Sprintf("%s\t%s\t%s\t%s\t%s\t%s\t",
@@ -165,6 +169,40 @@ func (p *DigitalOceanProvider) Sizes(ctx context.Context) error {
 	}
 	w.Flush()
 	fmt.Println()
+}
+
+func (p *DigitalOceanProvider) Sizes(ctx context.Context) error {
+	sizes, _, err := p.client.Sizes.List(ctx, doDefaultPageOpts)
+	if err != nil {
+		return err
+	}
+
+	optimizedSizes := filterSizes(sizes, func(slug string) bool {
+		if strings.Contains(slug, "c-") {
+			return true
+		}
+		return false
+	})
+
+	standardSizes := filterSizes(sizes, func(slug string) bool {
+		if strings.Contains(slug, "s-") {
+			return true
+		}
+		return false
+	})
+
+	flexSizes := filterSizes(sizes, func(slug string) bool {
+		if !strings.Contains(slug, "s-") && !strings.Contains(slug, "c-") {
+			return true
+		}
+		return false
+	})
+
+	fmt.Println()
+	displaySizes("Standard Droplets:", standardSizes)
+	displaySizes("Flexible Droplets:", flexSizes)
+	displaySizes("Optimized Droplets:", optimizedSizes)
+
 	log.Infof("(%d) droplet sizes found\n", len(sizes))
 
 	return nil
