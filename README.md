@@ -85,6 +85,6 @@ Benchmark completed...tearing down droplet.
 * * The list goes on...
 
 ### Caution:
-* This utility is unstable, API is in flux and is expected to change
+* This utility is in active development, API is in flux and is expected to change
 * This project and its maintainers are NOT responsible for any monetary charges, overages, fees as a result of the auto-provision process during proper usage of the script, bugs in the script or because you decided to leave a cloud server running for months
 
