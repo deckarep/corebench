@@ -171,10 +171,17 @@ func displaySizes(category string, sizes []godo.Size) {
 	fmt.Println()
 }
 
-func (p *DigitalOceanProvider) Sizes(ctx context.Context) error {
+type sizeTypes struct {
+	optimized []godo.Size
+	standard  []godo.Size
+	flexible  []godo.Size
+	count     int
+}
+
+func (p *DigitalOceanProvider) fetchSizes(ctx context.Context) (*sizeTypes, error) {
 	sizes, _, err := p.client.Sizes.List(ctx, doDefaultPageOpts)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	optimizedSizes := filterSizes(sizes, func(slug string) bool {
@@ -198,12 +205,27 @@ func (p *DigitalOceanProvider) Sizes(ctx context.Context) error {
 		return false
 	})
 
-	fmt.Println()
-	displaySizes("Standard Droplets:", standardSizes)
-	displaySizes("Flexible Droplets:", flexSizes)
-	displaySizes("Optimized Droplets:", optimizedSizes)
+	st := sizeTypes{
+		optimized: optimizedSizes,
+		standard:  standardSizes,
+		flexible:  flexSizes,
+		count:     len(optimizedSizes) + len(standardSizes) + len(flexSizes),
+	}
+	return &st, nil
+}
 
-	log.Infof("(%d) droplet sizes found\n", len(sizes))
+func (p *DigitalOceanProvider) Sizes(ctx context.Context) error {
+	st, err := p.fetchSizes(ctx)
+	if err != nil {
+		log.Fatal("Error fetching sizes:", err)
+	}
+
+	fmt.Println()
+	displaySizes("Standard Droplets:", st.standard)
+	displaySizes("Flexible Droplets:", st.flexible)
+	displaySizes("Optimized Droplets:", st.optimized)
+
+	log.Infof("(%d) droplet sizes found\n", st.count)
 
 	return nil
 }
