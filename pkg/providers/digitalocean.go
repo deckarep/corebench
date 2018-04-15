@@ -54,12 +54,12 @@ runcmd:
   - echo "Finished corebench initialization"
 `
 	benchReadyScript     = "export GOPATH=/root/go && while [ ! -f $GOPATH/.core-init ]; do sleep 1; done"
-	benchCommandTemplate = `cd $GOPATH/src/${git-repo} && /usr/local/go/bin/go version && /usr/local/go/bin/go get -t ./... && /usr/local/go/bin/go test -v ${benchmem-setting}-cpu ${cpu-count} -bench=${bench-regex}`
-	latestGoVersion      = "1.10.1"
-	goVersion            = "go1.10.1.linux-amd64.tar.gz"
+	benchCommandTemplate = `cd $GOPATH/src/${git-repo} && /usr/local/go/bin/go version && /usr/local/go/bin/go test -v ${benchmem-setting}-cpu ${cpu-count} -bench=${bench-regex}`
+	defaultGoVersion     = "1.10.1" //"1.8.7"
 )
 
 var (
+	goVersionFmt      = "go%s.linux-amd64.tar.gz"
 	doDefaultPageOpts = &godo.ListOptions{
 		Page:    1,
 		PerPage: 200,
@@ -269,7 +269,7 @@ func (p *DigitalOceanProvider) processCloudInitTemplate(settings ProviderSpinSet
 	p.repoLastPath = utility.GitPathLast(settings.GitURL())
 
 	finalCloudTemplate :=
-		strings.Replace(cloudInitTemplate, "${go-version}", goVersion, -1)
+		strings.Replace(cloudInitTemplate, "${go-version}", fmt.Sprintf(goVersionFmt, defaultGoVersion), -1)
 	finalCloudTemplate =
 		strings.Replace(finalCloudTemplate, "${git-repo}", settings.GitURL(), -1)
 	finalCloudTemplate =
@@ -332,7 +332,7 @@ func (p *DigitalOceanProvider) Spinup(ctx context.Context, settings ProviderSpin
 		Size:   "s-1vcpu-1gb",
 		// Costs: .71 cents just to turn this beyatch on.
 		//Region: "nyc1",
-		//Size:   "48gb",
+		//Size:   "c-16",
 		Tags: []string{"corebench"},
 		Image: godo.DropletCreateImage{
 			Slug: "ubuntu-14-04-x64",
