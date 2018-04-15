@@ -291,11 +291,41 @@ func (p *DigitalOceanProvider) processBenchCommandTemplate(settings ProviderSpin
 	return fmt.Sprintf("%s && %s", benchReadyScript, benchCmd)
 }
 
+func (p *DigitalOceanProvider) selectDroplet(ctx context.Context, settings ProviderSpinSettings) godo.Size {
+	sizes, err := p.fetchSizes(ctx)
+	if err != nil {
+		log.Fatal("Failed to fetch Droplet sizes with err:", err.Error())
+	}
+
+	maxCPUSize := settings.MaxCpu()
+	var selectedSize godo.Size
+	for _, sz := range sizes.optimized {
+		if maxCPUSize <= sz.Vcpus {
+			selectedSize = sz
+			break
+		}
+	}
+
+	if selectedSize.Vcpus == 0 {
+		log.Fatalf("No droplets exist that match a CPU size of %d", maxCPUSize)
+	}
+
+	return selectedSize
+}
+
 func (p *DigitalOceanProvider) Spinup(ctx context.Context, settings ProviderSpinSettings) error {
 
 	//log.Fatal(p.processCloudInitTemplate(settings))
-
 	//log.Fatal(p.processBenchCommandTemplate(settings))
+	selectedSize := p.selectDroplet(ctx, settings)
+
+	fmt.Printf("About to provision Droplet slug size: %s with cpu count of: %d?\n", selectedSize.Slug, selectedSize.Vcpus)
+	if !utility.PromptConfirmation("Continue provisioning?") {
+		log.Info("Quiting")
+		return nil
+	}
+
+	log.Fatal("You picked yes!")
 
 	createRequest := &godo.DropletCreateRequest{
 		Name: fmt.Sprintf(doProviderInstanceNameFmt, utility.NewInstanceID()),

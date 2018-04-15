@@ -26,6 +26,7 @@ import "context"
 type ProviderSpinSettings interface {
 	GitURL() string
 	Cpus() string
+	MaxCpu() int
 	BenchMemString() string
 	Regex() string
 	LeaveRunning() bool

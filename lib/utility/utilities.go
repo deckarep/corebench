@@ -1,6 +1,8 @@
 package utility
 
 import (
+	"fmt"
+	"log"
 	"strings"
 
 	uuid "github.com/satori/go.uuid"
@@ -20,4 +22,39 @@ func NewInstanceID() string {
 	g := uuid.Must(uuid.NewV4())
 	p := strings.Split(g.String(), "-")
 	return p[len(p)-1]
+}
+
+// PromptConfirmation asks the user for confirmation.
+func PromptConfirmation(msg string) bool {
+	fmt.Println(msg)
+
+	var response string
+	_, err := fmt.Scanln(&response)
+	if err != nil {
+		log.Fatal(err)
+	}
+	okayResponses := []string{"y", "Y", "yes", "Yes", "YES"}
+	nokayResponses := []string{"n", "N", "no", "No", "NO"}
+	if containsString(okayResponses, response) {
+		return true
+	} else if containsString(nokayResponses, response) {
+		return false
+	} else {
+		fmt.Println("Please type yes or no and then press enter:")
+		return PromptConfirmation(msg)
+	}
+}
+
+func posString(slice []string, element string) int {
+	for index, elem := range slice {
+		if elem == element {
+			return index
+		}
+	}
+	return -1
+}
+
+// containsString returns true iff slice contains element
+func containsString(slice []string, element string) bool {
+	return !(posString(slice, element) == -1)
 }

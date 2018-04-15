@@ -21,6 +21,11 @@ SOFTWARE.
 
 package providers
 
+import (
+	"strconv"
+	"strings"
+)
+
 type DoSpinSettings struct {
 	Git              string
 	Cpu              string
@@ -41,7 +46,20 @@ func (do *DoSpinSettings) GitURL() string {
 }
 
 func (do *DoSpinSettings) Cpus() string {
+
 	return do.Cpu
+}
+
+func (do *DoSpinSettings) MaxCpu() int {
+	cpus := strings.Split(do.Cpu, ",")
+	var maxCpu int
+	for _, c := range cpus {
+		cpu, _ := strconv.Atoi(strings.TrimSpace(c))
+		if cpu > maxCpu {
+			maxCpu = cpu
+		}
+	}
+	return maxCpu
 }
 
 func (do *DoSpinSettings) Regex() string {
