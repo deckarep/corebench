@@ -37,6 +37,7 @@ var (
 	leaveRunning bool
 	benchMem     bool
 	regexString  string
+	goVersion    string
 )
 
 // Usage: ./corebench do bench -t=$TOKEN -k=$SSH_FINGERPRINT -git github.com/deckarep/golang-set
@@ -51,6 +52,8 @@ func init() {
 		"leave-running", "", false, "indicates whether corebench should auto-terminate instance(s) on complete")
 	digitalOceanBenchCmd.PersistentFlags().BoolVarP(&benchMem,
 		"benchmem", "", false, "indicates whether corebench include allocations just like the go tool")
+	digitalOceanBenchCmd.PersistentFlags().StringVarP(&goVersion,
+		"go", "", "1.10.1", "specifies the go version and must be a proper released version")
 
 	// TODO: -race flag (like go tooling)
 	digitalOceanCmd.AddCommand(digitalOceanBenchCmd)
@@ -73,6 +76,7 @@ var digitalOceanBenchCmd = &cobra.Command{
 			Benchmem:         benchMem,
 			RegexFlag:        regexString,
 			LeaveRunningFlag: leaveRunning,
+			GoVersionFlag:    goVersion,
 		}
 
 		provider := providers.NewDigitalOceanProvider(token)

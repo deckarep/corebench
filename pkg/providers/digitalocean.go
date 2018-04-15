@@ -55,7 +55,6 @@ runcmd:
 `
 	benchReadyScript     = "export GOPATH=/root/go && while [ ! -f $GOPATH/.core-init ]; do sleep 1; done"
 	benchCommandTemplate = `cd $GOPATH/src/${git-repo} && /usr/local/go/bin/go version && /usr/local/go/bin/go test -v ${benchmem-setting}-cpu ${cpu-count} -bench=${bench-regex}`
-	defaultGoVersion     = "1.10.1" //"1.8.7"
 )
 
 var (
@@ -269,7 +268,7 @@ func (p *DigitalOceanProvider) processCloudInitTemplate(settings ProviderSpinSet
 	p.repoLastPath = utility.GitPathLast(settings.GitURL())
 
 	finalCloudTemplate :=
-		strings.Replace(cloudInitTemplate, "${go-version}", fmt.Sprintf(goVersionFmt, defaultGoVersion), -1)
+		strings.Replace(cloudInitTemplate, "${go-version}", fmt.Sprintf(goVersionFmt, settings.GoVersion()), -1)
 	finalCloudTemplate =
 		strings.Replace(finalCloudTemplate, "${git-repo}", settings.GitURL(), -1)
 	finalCloudTemplate =

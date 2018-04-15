@@ -24,6 +24,7 @@ package providers
 import "context"
 
 type ProviderSpinSettings interface {
+	GoVersion() string
 	GitURL() string
 	Cpus() string
 	MaxCpu() int
