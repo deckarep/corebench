@@ -38,6 +38,7 @@ var (
 	benchMem     bool
 	regexString  string
 	goVersion    string
+	count        int
 )
 
 // Usage: ./corebench do bench -t=$TOKEN -k=$SSH_FINGERPRINT -git github.com/deckarep/golang-set
@@ -54,6 +55,8 @@ func init() {
 		"benchmem", "", false, "indicates whether corebench include allocations just like the go tool")
 	digitalOceanBenchCmd.PersistentFlags().StringVarP(&goVersion,
 		"go", "", "1.10.1", "specifies the go version and must be a proper released version")
+	digitalOceanBenchCmd.PersistentFlags().IntVarP(&count,
+		"count", "", 1, "specifes the number of iterations to run the benchmark")
 
 	// TODO: -race flag (like go tooling)
 	digitalOceanCmd.AddCommand(digitalOceanBenchCmd)
@@ -77,6 +80,7 @@ var digitalOceanBenchCmd = &cobra.Command{
 			RegexFlag:        regexString,
 			LeaveRunningFlag: leaveRunning,
 			GoVersionFlag:    goVersion,
+			CountFlag:        count,
 		}
 
 		provider := providers.NewDigitalOceanProvider(token)

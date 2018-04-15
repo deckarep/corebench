@@ -31,6 +31,7 @@ type ProviderSpinSettings interface {
 	BenchMemString() string
 	Regex() string
 	LeaveRunning() bool
+	Count() int
 }
 
 type ProviderTermSettings interface {

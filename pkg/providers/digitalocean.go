@@ -54,7 +54,7 @@ runcmd:
   - echo "Finished corebench initialization"
 `
 	benchReadyScript     = "export GOPATH=/root/go && while [ ! -f $GOPATH/.core-init ]; do sleep 1; done"
-	benchCommandTemplate = `cd $GOPATH/src/${git-repo} && /usr/local/go/bin/go version && /usr/local/go/bin/go test -v ${benchmem-setting}-cpu ${cpu-count} -bench=${bench-regex}`
+	benchCommandTemplate = `cd $GOPATH/src/${git-repo} && /usr/local/go/bin/go version && /usr/local/go/bin/go test -v ${benchmem-setting}-cpu ${cpu-count} -bench=${bench-regex} -count=${bench-count}`
 )
 
 var (
@@ -286,6 +286,8 @@ func (p *DigitalOceanProvider) processBenchCommandTemplate(settings ProviderSpin
 		strings.Replace(benchCmd, "${benchmem-setting}", settings.BenchMemString(), -1)
 	benchCmd =
 		strings.Replace(benchCmd, "${bench-regex}", settings.Regex(), -1)
+	benchCmd =
+		strings.Replace(benchCmd, "${bench-count}", fmt.Sprintf("%d", settings.Count()), -1)
 
 	return fmt.Sprintf("%s && %s", benchReadyScript, benchCmd)
 }

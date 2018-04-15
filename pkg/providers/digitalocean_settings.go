@@ -27,12 +27,13 @@ import (
 )
 
 type DoSpinSettings struct {
-	GoVersionFlag    string
-	Git              string
-	Cpu              string
 	Benchmem         bool
-	RegexFlag        string
+	CountFlag        int
+	Cpu              string
+	Git              string
+	GoVersionFlag    string
 	LeaveRunningFlag bool
+	RegexFlag        string
 }
 
 func (do *DoSpinSettings) GoVersion() string {
@@ -44,6 +45,10 @@ func (do *DoSpinSettings) BenchMemString() string {
 		return "-benchmem "
 	}
 	return ""
+}
+
+func (do *DoSpinSettings) Count() int {
+	return do.CountFlag
 }
 
 func (do *DoSpinSettings) GitURL() string {
