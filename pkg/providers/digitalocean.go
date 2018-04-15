@@ -31,8 +31,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/deckarep/corebench/lib/ssh"
-	"github.com/deckarep/corebench/lib/utility"
+	"github.com/deckarep/corebench/pkg/ssh"
+	"github.com/deckarep/corebench/pkg/utility"
 	"github.com/digitalocean/godo"
 	"golang.org/x/oauth2"
 )
@@ -54,7 +54,7 @@ runcmd:
   - echo "Finished corebench initialization"
 `
 	benchReadyScript     = "export GOPATH=/root/go && while [ ! -f $GOPATH/.core-init ]; do sleep 1; done"
-	benchCommandTemplate = `cd $GOPATH/src/${git-repo} && /usr/local/go/bin/go version && /usr/local/go/bin/go test ${benchmem-setting}-cpu ${cpu-count} -bench=${bench-regex}`
+	benchCommandTemplate = `cd $GOPATH/src/${git-repo} && /usr/local/go/bin/go version && /usr/local/go/bin/go get -t ./... && /usr/local/go/bin/go test -v ${benchmem-setting}-cpu ${cpu-count} -bench=${bench-regex}`
 	latestGoVersion      = "1.10.1"
 	goVersion            = "go1.10.1.linux-amd64.tar.gz"
 )
@@ -246,7 +246,7 @@ func (p *DigitalOceanProvider) Term(ctx context.Context, settings ProviderTermSe
 	for _, droplet := range droplets {
 		ip, _ := droplet.PublicIPv4()
 		if settings.ShouldTerm(droplet.Name, ip) {
-			log.Info("Terminating:", droplet.ID, droplet.Name, ip, "against match")
+			log.Infof("Terminating: %d %s %s against match", droplet.ID, droplet.Name, ip)
 			_, err := p.client.Droplets.Delete(ctx, droplet.ID)
 			if err != nil {
 				log.WithField("id", droplet.ID).Warning("Failed to terminate droplet: need to retry or delete it manually or you will billed!!!")
@@ -325,8 +325,6 @@ func (p *DigitalOceanProvider) Spinup(ctx context.Context, settings ProviderSpin
 		return nil
 	}
 
-	log.Fatal("You picked yes!")
-
 	createRequest := &godo.DropletCreateRequest{
 		Name: fmt.Sprintf(doProviderInstanceNameFmt, utility.NewInstanceID()),
 		// Costs: .01 penny to turn on (test with this)
@@ -359,9 +357,9 @@ func (p *DigitalOceanProvider) Spinup(ctx context.Context, settings ProviderSpin
 		return err
 	}
 
-	log.Infof("Provisioning Droplet: %s ...\n", newDroplet.Name)
-	log.Info("Slug:", createRequest.Size)
-	log.Info("Region:", createRequest.Region)
+	log.Infof("Provisioning Droplet: %s ...", newDroplet.Name)
+	log.Info("Slug: ", createRequest.Size)
+	log.Info("Region: ", createRequest.Region)
 
 	// fmt.Println(newDroplet.Name)
 	// fmt.Println(newDroplet.ID)

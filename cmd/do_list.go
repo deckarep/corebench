@@ -25,7 +25,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/deckarep/corebench/lib/providers"
+	"github.com/deckarep/corebench/pkg/providers"
 	"github.com/spf13/cobra"
 )
 

@@ -31,6 +31,8 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 // BenchmarkAtomicIn increments a `uint64`...atomically.
@@ -138,6 +140,24 @@ func BenchmarkRWMutexDeferInc(b *testing.B) {
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
 			f()
+		}
+	})
+}
+
+// BenchmarkGoUUIDV1 generates a bunch of V1 UUIDs using the satori pkg.
+func BenchmarkGoUUIDV1(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			uuid.NewV1()
+		}
+	})
+}
+
+// BenchmarkGoUUIDV1 generates a bunch of V5 UUIDs using the satori pkg.
+func BenchmarkGoUUIDV5(b *testing.B) {
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			uuid.NewV5(uuid.NamespaceOID, "corebench")
 		}
 	})
 }

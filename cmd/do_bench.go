@@ -26,7 +26,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/deckarep/corebench/lib/providers"
+	"github.com/deckarep/corebench/pkg/providers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
