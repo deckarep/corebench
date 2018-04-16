@@ -6,18 +6,16 @@ Benchmark utility that's intended to exercise benchmarks and how they scale with
 ### TL;DR
 How does your code scale and perform when running on high-core servers?
 
-Let's find out:
-
 ### Demo
 [![asciicast](https://asciinema.org/a/l7q1KEz6knaH07z6zq7x2Ki8L.png)](https://asciinema.org/a/l7q1KEz6knaH07z6zq7x2Ki8L)
 
 
 ### Features
 * First Provider: DigitalOcean up to 48 cores currently.
-* --cpu flag supported: allows to specify cpu delimited list
-* --benchmem flag supported: allows to capture allocations
-* --count flag supported: allows for multiple iterations of each benchmark
-* --stat flag supported: executes benchstat analysis
+* --cpu flag supported: specify cpu delimited list
+* --benchmem flag supported: capture allocations
+* --count flag supported: multiple iterations of each benchmark
+* --stat flag supported: executes [benchstat](https://github.com/golang/perf/tree/master/cmd/benchstat) analysis
 * --regex flag supported: limits which benchmarks are run
 * --leave-running flag supported: leaves a box running so user can log on
 * sizes command: lists DigitalOcean instance sizes
