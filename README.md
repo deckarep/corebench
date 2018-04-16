@@ -8,58 +8,13 @@ How does your code scale and perform when running on high-core servers?
 
 Let's find out:
 
-### Example
+### Demo
+[![asciicast](https://asciinema.org/a/l7q1KEz6knaH07z6zq7x2Ki8L.png)](https://asciinema.org/a/l7q1KEz6knaH07z6zq7x2Ki8L)
 
-Create some parallel benchmarks for your codebase
-```go
-// BenchmarkSomething utilizes the `b.RunParallel` feature of Go's benchmarking suite.
-func BenchmarkSomething(b *testing.B) {
-    foo := NewFoo()
-    b.RunParallel(func(pb *testing.PB) {
-        for pb.Next() {
-            foo.Bar()
-        }
-    })
-}
-```
 
-Run this command
-```sh
-./corebench do bench --cpu=1,2,4,8,16,32,48 github.com/{user}/{your-code} 
-```
 
-See this output
-```sh
-Provision 48-core droplet..
-Droplet created: x.x.x.x -- running benchmark...
 
-goos: linux
-goarch: amd64
-BenchmarkStoreRegular-2               	 2000000	       529 ns/op	      88 B/op	       0 allocs/op
-BenchmarkStoreRegular-4               	 3000000	       452 ns/op	      61 B/op	       0 allocs/op
-BenchmarkStoreRegular-8               	 5000000	       419 ns/op	      70 B/op	       0 allocs/op
-BenchmarkStoreRegular-16               	 5000000	       419 ns/op	      70 B/op	       0 allocs/op
-BenchmarkStoreRegular-32               	 5000000	       419 ns/op	      70 B/op	       0 allocs/op
-BenchmarkStoreRegular-48               	 5000000	       419 ns/op	      70 B/op	       0 allocs/op
-BenchmarkStoreSync-2                  	 1000000	      2250 ns/op	     179 B/op	       5 allocs/op
-BenchmarkStoreSync-4                  	 1000000	      1807 ns/op	     179 B/op	       5 allocs/op
-BenchmarkStoreSync-8                  	 1000000	      1637 ns/op	     179 B/op	       5 allocs/op
-BenchmarkStoreSync-16                  	 1000000	      1637 ns/op	     179 B/op	       5 allocs/op
-BenchmarkStoreSync-32                  	 1000000	      1637 ns/op	     179 B/op	       5 allocs/op
-BenchmarkStoreSync-48                  	 1000000	      1637 ns/op	     179 B/op	       5 allocs/op
-BenchmarkDeleteRegular-2              	10000000	       222 ns/op	       0 B/op	       0 allocs/op
-BenchmarkDeleteRegular-4              	10000000	       224 ns/op	       0 B/op	       0 allocs/op
-BenchmarkDeleteRegular-8              	10000000	       228 ns/op	       0 B/op	       0 allocs/op
-BenchmarkDeleteRegular-16              	10000000	       228 ns/op	       0 B/op	       0 allocs/op
-BenchmarkDeleteRegular-32              	10000000	       228 ns/op	       0 B/op	       0 allocs/op
-BenchmarkDeleteRegular-48              	10000000	       228 ns/op	       0 B/op	       0 allocs/op
-BenchmarkDeleteSync-2                   []
-...
-...
-...
 
-Benchmark completed...tearing down droplet.
-```
 
 ### Here's what happens:
 * A command like above will provision an on-demand high-performance computing server

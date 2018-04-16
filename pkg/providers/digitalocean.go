@@ -335,10 +335,12 @@ func (p *DigitalOceanProvider) Spinup(ctx context.Context, settings ProviderSpin
 	}
 
 	createRequest := &godo.DropletCreateRequest{
-		Name: fmt.Sprintf(doProviderInstanceNameFmt, utility.NewInstanceID()),
-		// Costs: .01 penny to turn on (test with this)
+		Name:   fmt.Sprintf(doProviderInstanceNameFmt, utility.NewInstanceID()),
 		Region: "sfo2",
-		Size:   "s-1vcpu-1gb",
+		Size:   selectedSize.Slug,
+		// Costs: .01 penny to turn on (test with this)
+		//Region: "sfo2",
+		//Size:   "s-1vcpu-1gb",
 		// Costs: .71 cents just to turn this beyatch on.
 		//Region: "nyc1",
 		//Size:   "c-16",
