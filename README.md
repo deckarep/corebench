@@ -12,8 +12,43 @@ Let's find out:
 [![asciicast](https://asciinema.org/a/l7q1KEz6knaH07z6zq7x2Ki8L.png)](https://asciinema.org/a/l7q1KEz6knaH07z6zq7x2Ki8L)
 
 
+### Features
+* First Provider: DigitalOcean up to 48 cores currently.
+* --cpu flag supported: allows to specify cpu delimited list
+* --benchmem flag supported: allows to capture allocations
+* --count flag supported: allows for multiple iterations of each benchmark
+* --stat flag supported: executes benchstat analysis
+* --regex flag supported: limits which benchmarks are run
+* --leave-running flag supported: leaves a box running so user can log on
+* sizes command: lists DigitalOcean instance sizes
+* term command: terminates instances created by corebench
+* list command: lists active corebench provisioned instances
 
+### Usage
+```go
+# Install corebench
+go get github.com/deckarep/corebench
+```
 
+Next, as DigitalOcean is the ONLY provider supported you must do the following 3 steps
+* Sign up for a DigitalOcean account if not already a member
+* Create a DigitalOcean Personal Access Token to be used for: --DO_PAT={token-here}
+* Add your SSH public key to DigitalOcean for SSH access: --ssh-fp={ssh-md5-signature}
+
+Run corebench:
+```go
+// Fetch instance sizes
+./corebench do sizes --DO_PAT=$DO_PAT
+
+// Run a benchmark
+./corebench do bench github.com/{user}/{repo} [OPTIONS] --DO_PAT=$DO_PAT --ssh-fp=$SF
+
+// List active instances
+./corebench do list --DO_PAT=$DO_PAT
+
+// Terminate instances created by corebench
+./corebench do term --DO_PAT=$DO_PAT --all
+```
 
 
 ### Here's what happens:
