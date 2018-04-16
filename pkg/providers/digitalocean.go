@@ -47,14 +47,17 @@ runcmd:
   - apt-get -y install git
   - wget https://storage.googleapis.com/golang/${go-version}
   - tar -C /usr/local -xzf ${go-version}
+  - export GOROOT=/usr/local/go
   - export GOPATH=/root/go
   - mkdir -p $GOPATH
-  - /usr/local/go/bin/go get ${git-repo}
+  - $GOROOT/bin/go get github.com/golang/perf/cmd/benchstat
+  - $GOROOT/bin/go get ${git-repo}
   - touch $GOPATH/.core-init
   - echo "Finished corebench initialization"
 `
 	benchReadyScript     = "export GOPATH=/root/go && while [ ! -f $GOPATH/.core-init ]; do sleep 1; done"
 	benchCommandTemplate = `cd $GOPATH/src/${git-repo} && /usr/local/go/bin/go version && /usr/local/go/bin/go test -v ${benchmem-setting}-cpu ${cpu-count} -bench=${bench-regex} -count=${bench-count}`
+	benchStatTemplate    = " | tee benchmark.log && echo '\n\n' && $GOPATH/bin/benchstat benchmark.log"
 )
 
 var (
@@ -289,6 +292,11 @@ func (p *DigitalOceanProvider) processBenchCommandTemplate(settings ProviderSpin
 	benchCmd =
 		strings.Replace(benchCmd, "${bench-count}", fmt.Sprintf("%d", settings.Count()), -1)
 
+	// Should be last, turns on the benchstat summary
+	if settings.Stat() {
+		benchCmd = benchCmd + benchStatTemplate
+	}
+
 	return fmt.Sprintf("%s && %s", benchReadyScript, benchCmd)
 }
 
@@ -321,7 +329,7 @@ func (p *DigitalOceanProvider) Spinup(ctx context.Context, settings ProviderSpin
 	selectedSize := p.selectDroplet(ctx, settings)
 
 	fmt.Printf("About to provision Droplet slug size: %s with cpu count of: %d?\n", selectedSize.Slug, selectedSize.Vcpus)
-	if !utility.PromptConfirmation("Continue provisioning?") {
+	if !utility.PromptConfirmation("Continue provisioning? (Yy)es/(Nn)o") {
 		log.Info("Quiting")
 		return nil
 	}

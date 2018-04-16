@@ -34,6 +34,7 @@ type DoSpinSettings struct {
 	GoVersionFlag    string
 	LeaveRunningFlag bool
 	RegexFlag        string
+	StatFlag         bool
 }
 
 func (do *DoSpinSettings) GoVersion() string {
@@ -81,6 +82,10 @@ func (do *DoSpinSettings) Regex() string {
 
 func (do *DoSpinSettings) LeaveRunning() bool {
 	return do.LeaveRunningFlag
+}
+
+func (do *DoSpinSettings) Stat() bool {
+	return do.StatFlag
 }
 
 type DoTermSettings struct {

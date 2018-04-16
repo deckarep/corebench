@@ -39,6 +39,7 @@ var (
 	regexString  string
 	goVersion    string
 	count        int
+	stat         bool
 )
 
 // Usage: ./corebench do bench -t=$TOKEN -k=$SSH_FINGERPRINT -git github.com/deckarep/golang-set
@@ -51,6 +52,8 @@ func init() {
 		"regex", "", "", "a regex to filter bench tests by")
 	digitalOceanBenchCmd.PersistentFlags().BoolVarP(&leaveRunning,
 		"leave-running", "", false, "indicates whether corebench should auto-terminate instance(s) on complete")
+	digitalOceanBenchCmd.PersistentFlags().BoolVarP(&stat,
+		"stat", "", false, "indicates whether corebench should generate benchstat summary")
 	digitalOceanBenchCmd.PersistentFlags().BoolVarP(&benchMem,
 		"benchmem", "", false, "indicates whether corebench include allocations just like the go tool")
 	digitalOceanBenchCmd.PersistentFlags().StringVarP(&goVersion,
@@ -81,6 +84,7 @@ var digitalOceanBenchCmd = &cobra.Command{
 			LeaveRunningFlag: leaveRunning,
 			GoVersionFlag:    goVersion,
 			CountFlag:        count,
+			StatFlag:         stat,
 		}
 
 		provider := providers.NewDigitalOceanProvider(token)

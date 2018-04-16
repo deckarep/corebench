@@ -32,6 +32,7 @@ type ProviderSpinSettings interface {
 	Regex() string
 	LeaveRunning() bool
 	Count() int
+	Stat() bool
 }
 
 type ProviderTermSettings interface {
