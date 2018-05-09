@@ -22,13 +22,18 @@ How does your code scale and perform when running on high-core servers?
 * term command: terminates instances created by corebench
 * list command: lists active corebench provisioned instances
 
+* Second Provider: AWS, specify your preferred instance type, us-east-1a for now
+* --instancetype (e.g. t2.micro)
+* --sizes - currently TODO - pricing API needs a soft touch/to add real value beyond --list, need mapping of instancetype/reigion --> ami
+* all other flags supported
+
 ### Usage
 ```go
 # Install corebench
 go get github.com/deckarep/corebench
 ```
 
-Next, as DigitalOcean is the ONLY provider supported you must do the following 3 steps
+DigitalOcean:
 * Sign up for a DigitalOcean account if not already a member
 * Create a DigitalOcean Personal Access Token to be used for: --DO_PAT={token-here}
 * Add your SSH public key to DigitalOcean for SSH access: --ssh-fp={ssh-md5-signature}
@@ -48,15 +53,36 @@ Run corebench:
 ./corebench do term --DO_PAT=$DO_PAT --all
 ```
 
+AWS:
+* Sign up for AWS!
+* Make sure your instance type is available (request a limit increase with support if needed)
+
+Run corebench:
+```go
+// Run a benchmark
+./corebench aws bench github.com/{user}/{repo} [OPTIONS]
+
+//Run a benchmark on this repo with instancetype xxx and leave the resources running
+./corebench aws bench github.com/deckarep/corebench --instancetype m3.medium --leave-running true
+
+// List running instances
+./corebench aws list
+
+// Terminate/delete AWS resource stack 'corebench'
+./corebench aws term
+
+
+```
+
 
 ### Here's what happens:
 * A command like above will provision an on-demand high-performance computing server
 * Installs Go, and clones your repository
 * It will run Go's benchmark tooling against your repo and generate a comprehensive report demonstrating just how well your code scales across a large number of cores
-* It will immediately decomission the computing resource so you only pay for a fraction of the cost
+* It will immediately decomission (unless leave-running flag set) the computing resource so you only pay for a fraction of the cost
 
 ### Here's what you need:
-* API/Credential access to at least one provider - Digital Ocean is the first provider to exist
+* API/Credential access to at least one provider - Both Digital Ocean & AWS are currently supported
 * The ability to pay for your own computing resources for which ever providers you choose
 * A source repo with comprehensive benchmarks to run against this suite
 
@@ -74,7 +100,7 @@ Run corebench:
 
 ### F.A.Q.
  - Q: Why is 48 the max amount of cores this utility supports?
- - A: Because DigitalOcean is the first provider and that is their beefiest box.
+ - A: This is DigitalOcean's beefiest box. AWS cores currently specified by instance type.
 
  - Q: What happens to the server and the code after the benchmark completes?
  - A: The default behavior is the server is destroyed along with the code and benchmark data. There is a setting that allows you to leave the server running if you'd like to log in and inspect the results using the --leave-running flag.
@@ -83,7 +109,7 @@ Run corebench:
  - A: Easy, because their droplets fire up *FAST* allowing a quick feedback loop during development of this project.
 
  - Q: When you will you add Google Cloud, AWS, {other-provider} next?
- - A: Google Cloud is next because they offer per minute billing which is great to save money. I'm hoping the community can help me build other providers along with refactoring as necessary to align the API.
+ - A: AWS support has been added. Google Cloud is next because they offer per minute billing which is great to save money. I'm hoping the community can help me build other providers along with refactoring as necessary to align the API.
 
  - Q: Why did you build this tool?
  - A: Because I wanted to quick way to execute remote benchmarks on cloud servers that are beefy (large number of cores).
@@ -101,4 +127,3 @@ Run corebench:
 ### Caution:
 * This utility is in active development, API is in flux and is expected to change
 * This project and its maintainers are NOT responsible for any monetary charges, overages, fees as a result of the auto-provision process during proper usage of the script, bugs in the script or because you decided to leave a cloud server running for months
-

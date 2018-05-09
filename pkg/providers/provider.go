@@ -27,6 +27,7 @@ type ProviderSpinSettings interface {
 	GoVersion() string
 	GitURL() string
 	Cpus() string
+	InstanceTypeString() string
 	MaxCpu() int
 	BenchMemString() string
 	Regex() string

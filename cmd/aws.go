@@ -19,17 +19,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package cmd
 
 import (
-	"log"
-
-	"github.com/deckarep/corebench/cmd"
-
+	"github.com/spf13/cobra"
 )
 
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		log.Fatal("Failed to execute RootCmd with err:", err.Error())
-	}
+var (
+	awsfile  string
+)
+
+func init() {
+	awsCmd.PersistentFlags().StringVarP(&awsfile,
+		"awsfile", "f", "", "file is a path to save benchmark results")
+	RootCmd.AddCommand(awsCmd)
+}
+
+// benchCmd executes a remote benchmark.
+var awsCmd = &cobra.Command{
+	Use:   "aws",
+	Short: "is the aws corebench toolkit",
 }

@@ -19,17 +19,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package cmd
 
 import (
-	"log"
-
-	"github.com/deckarep/corebench/cmd"
-
+	// "context"
+	// "log"
+	//
+	// "github.com/deckarep/corebench/pkg/providers"
+	// "github.com/spf13/cobra"
 )
 
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		log.Fatal("Failed to execute RootCmd with err:", err.Error())
-	}
+// TODO: implement displaying instance/resource types/stack costs, half this functionality exists with 'list' cmd already
+
+func init() {
+	// awsCmd.AddCommand(awsSizesCmd)
 }
+//
+// var awsSizesCmd = &cobra.Command{
+// 	Use:   "sizes",
+// 	Short: "sizes shows the aws instance types and their associated costs",
+// 	Run: func(cmd *cobra.Command, args []string) {
+// 		provider := providers.NewAwsProvider("test")
+// 		ctx := context.Background()
+// 		err := provider.Sizes(ctx)
+// 		if err != nil {
+// 			log.Fatal(err)
+// 		}
+// 	},
+// }

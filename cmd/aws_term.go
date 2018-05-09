@@ -19,17 +19,49 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package cmd
 
 import (
-	"log"
+	"context"
 
-	"github.com/deckarep/corebench/cmd"
+	log "github.com/sirupsen/logrus"
 
+	"../pkg/providers"
+	"github.com/spf13/cobra"
 )
 
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		log.Fatal("Failed to execute RootCmd with err:", err.Error())
-	}
+// TODO: clean up AwsTermSettings-related stuff, nlr
+
+func init() {
+}
+var (
+	awsall  bool
+	awsip   string
+	instancename string
+)
+
+func init() {
+	awsTermCmd.PersistentFlags().BoolVarP(&awsall,
+		"all", "", false, "indicates if you would like to terminate all instances")
+	awsCmd.AddCommand(awsTermCmd)
+}
+
+var awsTermCmd = &cobra.Command{
+	Use:   "term",
+	Short: "terminates corebench resources provisioned on aws that are currently alive",
+	Run: func(cmd *cobra.Command, args []string) {
+
+		settings := &providers.AwsTermSettings{
+			AllFlag:  all,
+			IPFlag:   ip,
+			NameFlag: name,
+		}
+
+		provider := providers.NewAwsProvider()
+    ctx := context.Background()
+		err := provider.Term(ctx, settings)
+		if err != nil {
+			log.Fatal(err)
+		}
+	},
 }
