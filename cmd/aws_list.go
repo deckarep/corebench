@@ -24,9 +24,8 @@ package cmd
 import (
 	"context"
 	"log"
-	"../pkg/providers"
+	"github.com/deckarep/corebench/pkg/providers"
 	"github.com/spf13/cobra"
-	// "fmt"
 
 )
 

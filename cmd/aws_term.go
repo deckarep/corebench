@@ -26,7 +26,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"../pkg/providers"
+  "github.com/deckarep/corebench/pkg/providers"
 	"github.com/spf13/cobra"
 )
 
