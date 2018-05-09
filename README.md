@@ -11,7 +11,7 @@ How does your code scale and perform when running on high-core servers?
 
 
 ### Features
-* First Provider: DigitalOcean up to 48 cores currently.
+First Provider: DigitalOcean up to 48 cores currently.
 * --cpu flag supported: specify cpu delimited list
 * --benchmem flag supported: capture allocations
 * --count flag supported: multiple iterations of each benchmark
@@ -22,7 +22,8 @@ How does your code scale and perform when running on high-core servers?
 * term command: terminates instances created by corebench
 * list command: lists active corebench provisioned instances
 
-* Second Provider: AWS, specify your preferred instance type, us-east-1a for now
+
+Second Provider: AWS, specify your preferred instance type, us-east-1a for now
 * --instancetype (e.g. t2.micro)
 * --sizes - currently TODO - pricing API needs a soft touch/to add real value beyond --list, need mapping of instancetype/reigion --> ami
 * all other flags supported
