@@ -24,16 +24,16 @@ package cmd
 import (
 	"context"
 	"strings"
+
 	"github.com/deckarep/corebench/pkg/providers"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 var (
-	keypair string = "corebench"
+	keypair      string = "corebench"
 	instanceType string
 )
-
 
 // TODO: split out cores/instance types, map AMIs/regions/if HVM accordingly
 //       add cmds for stackname, region, keypair (?)
@@ -50,12 +50,12 @@ func init() {
 		"benchmem", "", false, "indicates whether corebench include allocations just like the go tool")
 	awsBenchCmd.PersistentFlags().StringVarP(&goVersion,
 		"go", "", "1.10.1", "specifies the go version and must be a proper released version")
-  awsCmd.AddCommand(awsBenchCmd)
+	awsCmd.AddCommand(awsBenchCmd)
 }
 
 var awsBenchCmd = &cobra.Command{
-	Use:    "bench",
-	Short:  "runs a remote benchmark on an aws instancetype",
+	Use:   "bench",
+	Short: "runs a remote benchmark on an aws instancetype",
 	Run: func(cmd *cobra.Command, args []string) {
 		ctx := context.Background()
 

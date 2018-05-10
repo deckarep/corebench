@@ -26,7 +26,7 @@ import (
 )
 
 var (
-	awsfile  string
+	awsfile string
 )
 
 func init() {

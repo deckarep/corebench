@@ -22,52 +22,54 @@ SOFTWARE.
 package providers
 
 import (
+	"bufio"
+	"context"
+	"fmt"
 	"os"
 	"strings"
 	"time"
-	log "github.com/sirupsen/logrus"
+
 	"github.com/deckarep/corebench/pkg/ssh"
 	"github.com/deckarep/corebench/pkg/utility"
-	"context"
-	"fmt"
-	"bufio"
+	log "github.com/sirupsen/logrus"
 
-	"github.com/aws/aws-sdk-go-v2/aws/awserr"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/aws/awserr"
 	"github.com/aws/aws-sdk-go-v2/aws/external"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	// "github.com/aws/aws-sdk-go-v2/service/pricing"
 )
 
 type AwsProvider struct {
-	client       *ec2.EC2
-	cfn          *cloudformation.CloudFormation
-  // TODO: add pricing to size cmd
+	client *ec2.EC2
+	cfn    *cloudformation.CloudFormation
+	// TODO: add pricing to size cmd
 	// pricing      *pricing.Pricing
 	instanceType string
 	repoLastPath string
 	Keyfile      string
 	sshKeys      string
 }
+
 var (
 	privateKey string
-	pairName string = "corebench"
-	awsRegion string = "us-east-1"
+	pairName   string = "corebench"
+	awsRegion  string = "us-east-1"
 )
 
 func NewAwsProvider() Provider {
 	cfg, err := external.LoadDefaultAWSConfig(
 		external.WithSharedConfigProfile("default"))
 	if err != nil {
-			panic("unable to load SDK config, " + err.Error())
+		panic("unable to load SDK config, " + err.Error())
 	}
-  // TODO: force region if sizecmd to get around issue with pricing api composing endpoint out of default region
+	// TODO: force region if sizecmd to get around issue with pricing api composing endpoint out of default region
 	cfg.Region = awsRegion
 
 	return &AwsProvider{
 		client: ec2.New(cfg),
-		cfn: cloudformation.New(cfg),
+		cfn:    cloudformation.New(cfg),
 		// TODO: add pricing to size cmd
 		// pricing: pricing.New(cfg),
 	}
@@ -78,15 +80,15 @@ func (p *AwsProvider) List(ctx context.Context) error {
 	input := &ec2.DescribeInstancesInput{
 		Filters: []ec2.Filter{
 			{
-				Name: aws.String("instance-state-name"),
+				Name:   aws.String("instance-state-name"),
 				Values: []string{"running", "pending"},
 			},
 			{
-				Name: aws.String("tag-value"),
+				Name:   aws.String("tag-value"),
 				Values: []string{"corebench"},
 			},
-	   },
-    }
+		},
+	}
 	req := svc.DescribeInstancesRequest(input)
 	result, err := req.Send()
 	if err != nil {
@@ -99,29 +101,29 @@ func (p *AwsProvider) List(ctx context.Context) error {
 			fmt.Println(err.Error())
 		}
 		return nil
-	 }
+	}
 	if len(result.Reservations) == 0 {
 		log.Infof("No Instances found. Check the AWS Console!")
 		return nil
 	} else {
-		  for _, reservation := range result.Reservations {
-				for _, instance := range reservation.Instances {
-        if *instance.PublicDnsName != "" {
+		for _, reservation := range result.Reservations {
+			for _, instance := range reservation.Instances {
+				if *instance.PublicDnsName != "" {
 					fmt.Printf("corebench instance %v:", *instance.InstanceId)
 					fmt.Println("\n Type:             ", instance.InstanceType)
 					fmt.Println(" Keypair Name:     ", *instance.KeyName)
 					fmt.Println(" PublicDNS:        ", *instance.PublicDnsName)
 					fmt.Println(" IP Address:       ", *instance.PublicIpAddress)
-				 }
 				}
-			 }
-		 }
+			}
+		}
+	}
 	return nil
 }
 
 func (p *AwsProvider) SetKeys(keys []string) {
-  if p.checkKeypair(keys) != false {
-     p.deleteKeypair(keys)
+	if p.checkKeypair(keys) != false {
+		p.deleteKeypair(keys)
 	}
 	p.sshKeys = p.createKeypair(keys)
 	p.saveKeypair(p.sshKeys)
@@ -173,12 +175,12 @@ func (p *AwsProvider) Term(ctx context.Context, settings ProviderTermSettings) e
 func (p *AwsProvider) cleanup(keyname string) error {
 	svc := p.cfn
 	input := &cloudformation.DeleteStackInput{
-				StackName:    aws.String(keyname),
-			}
+		StackName: aws.String(keyname),
+	}
 	req := svc.DeleteStackRequest(input)
- 	_, err := req.Send()
-  // the below error check is essentially redundant, aws api will only return error on malformed request
-  p.genericAwsErrorCheck(err)
+	_, err := req.Send()
+	// the below error check is essentially redundant, aws api will only return error on malformed request
+	p.genericAwsErrorCheck(err)
 	log.Infof("Cleaning up resources...")
 	log.Infof("Stack deletion request sent for \"%v\"", *input.StackName)
 	return nil
@@ -187,20 +189,20 @@ func (p *AwsProvider) cleanup(keyname string) error {
 func (p *AwsProvider) createKeypair(keypair []string) string {
 	svc := p.client
 	input := &ec2.CreateKeyPairInput{
-			 KeyName: aws.String(pairName),
-	    }
+		KeyName: aws.String(pairName),
+	}
 	req := svc.CreateKeyPairRequest(input)
 	result, err := req.Send()
-	 if err != nil {
-			 if aerr, ok := err.(awserr.Error); ok && aerr.Code() == "InvalidKeyPair.Duplicate" {
-					 log.Infof("Keypair %q already exists", pairName)
-					 return ""
-			 }
-			 log.Fatalf("Unable to create key pair: %s, %v.", pairName, err)
-	 }
-	 log.Infof("Created keypair %q", *result.KeyName)
-	 privateKey = *result.KeyMaterial
-return privateKey
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok && aerr.Code() == "InvalidKeyPair.Duplicate" {
+			log.Infof("Keypair %q already exists", pairName)
+			return ""
+		}
+		log.Fatalf("Unable to create key pair: %s, %v.", pairName, err)
+	}
+	log.Infof("Created keypair %q", *result.KeyName)
+	privateKey = *result.KeyMaterial
+	return privateKey
 }
 
 func (p *AwsProvider) saveKeypair(privateKey string) error {
@@ -213,7 +215,7 @@ func (p *AwsProvider) saveKeypair(privateKey string) error {
 	writer := bufio.NewWriter(fileHandle)
 	defer fileHandle.Close()
 
-  fmt.Fprintln(writer, privateKey)
+	fmt.Fprintln(writer, privateKey)
 	writer.Flush()
 
 	log.Infof("Saved new keypair to file: %s", filename)
@@ -225,37 +227,37 @@ func (p *AwsProvider) checkKeypair(keypair []string) bool {
 	doesexist := false
 	svc := p.client
 	input := &ec2.DescribeKeyPairsInput{
-			 KeyNames: strings.Split(pairName, ","),
-			}
+		KeyNames: strings.Split(pairName, ","),
+	}
 	req := svc.DescribeKeyPairsRequest(input)
 	_, err := req.Send()
 	if err != nil {
-			if aerr, ok := err.(awserr.Error); ok && aerr.Code() == "InvalidKeyPair.NotFound" {
-					log.Infof("Key pair %q does not exist", pairName)
-					doesexist = false
-					return doesexist
-			}
+		if aerr, ok := err.(awserr.Error); ok && aerr.Code() == "InvalidKeyPair.NotFound" {
+			log.Infof("Key pair %q does not exist", pairName)
+			doesexist = false
+			return doesexist
+		}
 	}
 	doesexist = true
 	log.Infof("Keypair exists! Cleaning up and creating new keypair...")
-  return doesexist
+	return doesexist
 }
 
 func (p *AwsProvider) deleteKeypair(keypair []string) error {
 	svc := p.client
 	input := &ec2.DeleteKeyPairInput{
-			 KeyName: aws.String(pairName),
-			}
+		KeyName: aws.String(pairName),
+	}
 	req := svc.DeleteKeyPairRequest(input)
 	_, err := req.Send()
-  if err != nil {
-      if aerr, ok := err.(awserr.Error); ok && aerr.Code() == "InvalidKeyPair.Duplicate" {
-          log.Infof("Key pair %q does not exist, creating..", pairName)
-      }
-      log.Fatalf("Unable to delete key pair: %s, %v.", pairName, err)
-  }
-		return nil
-  }
+	if err != nil {
+		if aerr, ok := err.(awserr.Error); ok && aerr.Code() == "InvalidKeyPair.Duplicate" {
+			log.Infof("Key pair %q does not exist, creating..", pairName)
+		}
+		log.Fatalf("Unable to delete key pair: %s, %v.", pairName, err)
+	}
+	return nil
+}
 
 func (p *AwsProvider) processCfnTemplate(settings ProviderSpinSettings) string {
 	p.repoLastPath = utility.GitPathLast(settings.GitURL())
@@ -311,16 +313,16 @@ func (p *AwsProvider) genericAwsErrorCheck(err error) error {
 
 func (p *AwsProvider) Spinup(ctx context.Context, settings ProviderSpinSettings) error {
 	var instanceid string
-  svc := p.cfn
+	svc := p.cfn
 	finalCfnTemplate := p.processCfnTemplate(settings)
 	input := &cloudformation.CreateStackInput{
-				StackName:    aws.String(pairName),
-	      TemplateBody: aws.String(finalCfnTemplate),
-	    }
+		StackName:    aws.String(pairName),
+		TemplateBody: aws.String(finalCfnTemplate),
+	}
 	req := svc.CreateStackRequest(input)
 	log.Infof("About to provision Cloudformation stack \"%v\" with instance type \"%v\"", *input.StackName, settings.InstanceTypeString())
 	if !utility.PromptConfirmation("Continue provisioning? (Yy)es/(Nn)o") {
-    log.Info("Cleaning up...")
+		log.Info("Cleaning up...")
 		p.deleteKeypair(strings.Split(pairName, ","))
 		log.Info("Quitting")
 		return nil
@@ -330,96 +332,96 @@ func (p *AwsProvider) Spinup(ctx context.Context, settings ProviderSpinSettings)
 		log.Infof("Stack creation request sent: %v\n", result)
 	}
 
- notready := true
- for notready {
-  statusinput := &cloudformation.DescribeStacksInput{
-					StackName:  aws.String(pairName),
-	}
-	statusreq := svc.DescribeStacksRequest(statusinput)
-	statusresult, err := statusreq.Send()
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			default:
-				fmt.Println(aerr.Error())
-			}
-		} else {
-			fmt.Println(err.Error())
+	notready := true
+	for notready {
+		statusinput := &cloudformation.DescribeStacksInput{
+			StackName: aws.String(pairName),
 		}
-		return nil
-	 } else {
-		 for _, stackstatus := range statusresult.Stacks {
-       log.Infof("Waiting for stack resource creation to complete...")
-			 if stackstatus.StackStatus == "CREATE_COMPLETE" {
-			    log.Infof("Good news! Stack status is now %v\n", stackstatus.StackStatus)
+		statusreq := svc.DescribeStacksRequest(statusinput)
+		statusresult, err := statusreq.Send()
+		if err != nil {
+			if aerr, ok := err.(awserr.Error); ok {
+				switch aerr.Code() {
+				default:
+					fmt.Println(aerr.Error())
+				}
+			} else {
+				fmt.Println(err.Error())
+			}
+			return nil
+		} else {
+			for _, stackstatus := range statusresult.Stacks {
+				log.Infof("Waiting for stack resource creation to complete...")
+				if stackstatus.StackStatus == "CREATE_COMPLETE" {
+					log.Infof("Good news! Stack status is now %v\n", stackstatus.StackStatus)
 					notready = false
-		   }	else {
-				time.Sleep(30 * time.Second)
-			    }
-	   }
-	   }
- }
+				} else {
+					time.Sleep(30 * time.Second)
+				}
+			}
+		}
+	}
 
-	 var chosenIP string
-	 const maxDialAttempts = 20
+	var chosenIP string
+	const maxDialAttempts = 20
 
-	 // Spin wait - TODO: make this more graceful.
+	// Spin wait - TODO: make this more graceful.
 advance_to_ssh:
 	for {
-	 svc := p.client
-	 input := &ec2.DescribeInstancesInput{
-	 	Filters: []ec2.Filter{
-	 		{
-	 			Name: aws.String("instance-state-name"),
-	 			Values: []string{"running", "pending", "stopped"},
-	 		},
-	 		{
-	 			Name: aws.String("tag-value"),
-	 			Values: []string{"corebench"},
-	 		},
-	 	 },
-	 	}
-	 req := svc.DescribeInstancesRequest(input)
-	 result, err := req.Send()
-	 p.genericAwsErrorCheck(err)
+		svc := p.client
+		input := &ec2.DescribeInstancesInput{
+			Filters: []ec2.Filter{
+				{
+					Name:   aws.String("instance-state-name"),
+					Values: []string{"running", "pending", "stopped"},
+				},
+				{
+					Name:   aws.String("tag-value"),
+					Values: []string{"corebench"},
+				},
+			},
+		}
+		req := svc.DescribeInstancesRequest(input)
+		result, err := req.Send()
+		p.genericAwsErrorCheck(err)
 
-  var ip string
-	for _, reservation := range result.Reservations {
-		for _, instance := range reservation.Instances {
-			if len(reservation.Instances) == 0 {
-				fmt.Println("")
-				log.Infof("No Instances found! Check the AWS Console", err)
-				return nil
+		var ip string
+		for _, reservation := range result.Reservations {
+			for _, instance := range reservation.Instances {
+				if len(reservation.Instances) == 0 {
+					fmt.Println("")
+					log.Infof("No Instances found! Check the AWS Console", err)
+					return nil
+				}
+				ip = *instance.PublicIpAddress
+				instanceid = *instance.InstanceId
 			}
-			ip = *instance.PublicIpAddress
-			instanceid = *instance.InstanceId
+		}
+
+		if ip != "" {
+			chosenIP = ip
+			err = ssh.PollSSH(chosenIP + ":22")
+			if err == nil {
+				break advance_to_ssh
+			}
 		}
 	}
+	time.Sleep(time.Second * 30)
+	log.Infof("Instance %v is provisioned and reachable at ip: %v\n", instanceid, chosenIP)
+	log.Info("Instance benchmark starting momentarily...\n")
 
-	if ip != "" {
-		chosenIP = ip
-		err = ssh.PollSSH(chosenIP + ":22")
-		if err == nil {
-			break advance_to_ssh
-		}
+	AwsBenchCmd := p.processBenchCommandTemplate(settings)
+	chosenIP = fmt.Sprintf("ubuntu@%s", chosenIP)
+	err = ssh.ExecuteSSH(chosenIP, AwsBenchCmd)
+	if err != nil {
+		log.Fatalln("Failed to SSH: ", err)
 	}
- }
-   time.Sleep(time.Second * 30)
-	 log.Infof("Instance %v is provisioned and reachable at ip: %v\n", instanceid, chosenIP)
-	 log.Info("Instance benchmark starting momentarily...\n")
-
-	 AwsBenchCmd := p.processBenchCommandTemplate(settings)
-	 chosenIP = fmt.Sprintf("ubuntu@%s", chosenIP)
-	 err = ssh.ExecuteSSH(chosenIP, AwsBenchCmd)
-	 if err != nil {
-	 	log.Fatalln("Failed to SSH: ", err)
-	 }
-	 if !settings.LeaveRunning() {
-		 defer func () {
-		 p.cleanup(pairName)
-	   }()
-			 } else {
-				 log.Infof("Leaving AWS resources running! Execute \"ssh %s -i %s\" to connect to the instance", chosenIP, p.Keyfile)
-			 }
- return nil
+	if !settings.LeaveRunning() {
+		defer func() {
+			p.cleanup(pairName)
+		}()
+	} else {
+		log.Infof("Leaving AWS resources running! Execute \"ssh %s -i %s\" to connect to the instance", chosenIP, p.Keyfile)
+	}
+	return nil
 }

@@ -29,6 +29,7 @@ import (
 type DoSpinSettings struct {
 	Benchmem         bool
 	CountFlag        int
+	InstanceType     string
 	Cpu              string
 	Git              string
 	GoVersionFlag    string
@@ -39,6 +40,10 @@ type DoSpinSettings struct {
 
 func (do *DoSpinSettings) GoVersion() string {
 	return do.GoVersionFlag
+}
+
+func (do *DoSpinSettings) InstanceTypeString() string {
+	return do.InstanceType
 }
 
 func (do *DoSpinSettings) BenchMemString() string {

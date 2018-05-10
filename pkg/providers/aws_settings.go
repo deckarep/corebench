@@ -31,7 +31,7 @@ import (
 type AwsSpinSettings struct {
 	Benchmem         bool
 	CountFlag        int
-  InstanceType     string
+	InstanceType     string
 	Cpu              string
 	Git              string
 	GoVersionFlag    string

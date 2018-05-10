@@ -24,9 +24,9 @@ package cmd
 import (
 	"context"
 	"log"
+
 	"github.com/deckarep/corebench/pkg/providers"
 	"github.com/spf13/cobra"
-
 )
 
 var ()
@@ -46,5 +46,5 @@ var awsListCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-	 },
-	}
+	},
+}

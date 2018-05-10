@@ -26,7 +26,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-  "github.com/deckarep/corebench/pkg/providers"
+	"github.com/deckarep/corebench/pkg/providers"
 	"github.com/spf13/cobra"
 )
 
@@ -34,9 +34,10 @@ import (
 
 func init() {
 }
+
 var (
-	awsall  bool
-	awsip   string
+	awsall       bool
+	awsip        string
 	instancename string
 )
 
@@ -58,7 +59,7 @@ var awsTermCmd = &cobra.Command{
 		}
 
 		provider := providers.NewAwsProvider()
-    ctx := context.Background()
+		ctx := context.Background()
 		err := provider.Term(ctx, settings)
 		if err != nil {
 			log.Fatal(err)
