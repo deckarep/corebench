@@ -19,17 +19,32 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package main
+package cmd
 
 import (
+	"context"
 	"log"
 
-	"github.com/deckarep/corebench/cmd"
-
+	"github.com/deckarep/corebench/pkg/providers"
+	"github.com/spf13/cobra"
 )
 
-func main() {
-	if err := cmd.RootCmd.Execute(); err != nil {
-		log.Fatal("Failed to execute RootCmd with err:", err.Error())
-	}
+var ()
+
+func init() {
+	// TODO: -race flag (like go tooling)
+	awsCmd.AddCommand(awsListCmd)
+}
+
+var awsListCmd = &cobra.Command{
+	Use:   "list",
+	Short: "lists corebench resources provisioned in aws that are currently alive",
+	Run: func(cmd *cobra.Command, args []string) {
+		provider := providers.NewAwsProvider()
+		ctx := context.Background()
+		err := provider.List(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
+	},
 }

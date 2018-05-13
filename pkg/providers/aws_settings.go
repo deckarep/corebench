@@ -3,10 +3,10 @@ Open Source Initiative OSI - The MIT License (MIT):Licensing
 The MIT License (MIT)
 Copyright (c) 2018 Ralph Caraveo (deckarep@gmail.com)
 Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
+this software and associated awscumentation files (the "Software"), to deal in
 the Software without restriction, including without limitation the rights to
 use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
+of the Software, and to permit persons to whom the Software is furnished to aws
 so, subject to the following conditions:
 The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
@@ -26,7 +26,9 @@ import (
 	"strings"
 )
 
-type DoSpinSettings struct {
+// TODO: clean up AwsTermSettings-related stuff, nlr
+
+type AwsSpinSettings struct {
 	Benchmem         bool
 	CountFlag        int
 	InstanceType     string
@@ -38,36 +40,37 @@ type DoSpinSettings struct {
 	StatFlag         bool
 }
 
-func (do *DoSpinSettings) GoVersion() string {
-	return do.GoVersionFlag
+func (aws *AwsSpinSettings) GoVersion() string {
+	return aws.GoVersionFlag
 }
 
-func (do *DoSpinSettings) InstanceTypeString() string {
-	return do.InstanceType
+func (aws *AwsSpinSettings) InstanceTypeString() string {
+	return aws.InstanceType
 }
 
-func (do *DoSpinSettings) BenchMemString() string {
-	if do.Benchmem {
+func (aws *AwsSpinSettings) BenchMemString() string {
+	if aws.Benchmem {
 		return "-benchmem "
 	}
 	return ""
 }
 
-func (do *DoSpinSettings) Count() int {
-	return do.CountFlag
+func (aws *AwsSpinSettings) Count() int {
+	return aws.CountFlag
 }
 
-func (do *DoSpinSettings) GitURL() string {
-	return do.Git
+func (aws *AwsSpinSettings) GitURL() string {
+	return aws.Git
 }
 
-func (do *DoSpinSettings) Cpus() string {
+func (aws *AwsSpinSettings) Cpus() string {
+	aws.Cpu = "2"
 
-	return do.Cpu
+	return aws.Cpu
 }
 
-func (do *DoSpinSettings) MaxCpu() int {
-	cpus := strings.Split(do.Cpu, ",")
+func (aws *AwsSpinSettings) MaxCpu() int {
+	cpus := strings.Split(aws.Cpu, ",")
 	var maxCpu int
 	for _, c := range cpus {
 		cpu, _ := strconv.Atoi(strings.TrimSpace(c))
@@ -78,29 +81,29 @@ func (do *DoSpinSettings) MaxCpu() int {
 	return maxCpu
 }
 
-func (do *DoSpinSettings) Regex() string {
-	if do.RegexFlag == "" {
+func (aws *AwsSpinSettings) Regex() string {
+	if aws.RegexFlag == "" {
 		return "."
 	}
-	return do.RegexFlag
+	return aws.RegexFlag
 }
 
-func (do *DoSpinSettings) LeaveRunning() bool {
-	return do.LeaveRunningFlag
+func (aws *AwsSpinSettings) LeaveRunning() bool {
+	return aws.LeaveRunningFlag
 }
 
-func (do *DoSpinSettings) Stat() bool {
-	return do.StatFlag
+func (aws *AwsSpinSettings) Stat() bool {
+	return aws.StatFlag
 }
 
-type DoTermSettings struct {
+type AwsTermSettings struct {
 	AllFlag  bool
 	IPFlag   string
 	NameFlag string
 }
 
-func (do *DoTermSettings) ShouldTerm(name, ip string) bool {
-	if do.AllFlag || do.NameFlag == name || do.IPFlag == ip {
+func (aws *AwsTermSettings) ShouldTerm(name, ip string) bool {
+	if aws.AllFlag || aws.NameFlag == name || aws.IPFlag == ip {
 		return true
 	}
 	return false
